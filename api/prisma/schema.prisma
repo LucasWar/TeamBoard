@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -67,32 +67,34 @@ model User {
 
   memberships         Membership[]    @relation("UserMemberships")
   invitedMemberships  Membership[]    @relation("UserInvitations")
-  ownedOrgs           Organization[]  
+  ownedOrgs           Organization[]  @relation("OrganizationOwner")
   projects            Project[]
   assignedTasks       Task[]          @relation("TaskAssignee")
   reportedTasks       Task[]          @relation("TaskReporter")
   comments            Comment[]
   refreshTokens       RefreshToken[]  @relation("UserRefreshTokens")
+  logs                AuditLog[]
 }
 
 model Organization {
-  id            String     @id @default(uuid()) @db.Uuid
+  id            String      @id @default(uuid())    @db.Uuid
   name          String
-  slug          String     @unique
-  plan          EnumPlan   @default(FREE)
-  isActive      Boolean    @map("is_active") @default(true)
+  slug          String      @unique
+  plan          EnumPlan    @default(FREE)
+  isActive      Boolean     @map("is_active")       @default(true)
 
-  ownerUserId   String     @map("owner_user_id")
-  owner         User       @relation(fields: [ownerUserId], references: [id])
+  ownerUserId   String      @db.Uuid  @map("owner_user_id")
+  owner         User        @relation("OrganizationOwner", fields: [ownerUserId], references: [id])
 
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
-  deletedAt     DateTime?  @map("deleted_at")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  deletedAt     DateTime?   @map("deleted_at")
 
   memberships   Membership[]
   tasks         Task[]
   projects      Project[]    
   comments      Comment[]
+  auditLogs     AuditLog[]
 }
 
 
@@ -100,10 +102,10 @@ model Organization {
 model Membership {
   id              String        @id @default(uuid()) @db.Uuid
 
-  userId          String        @map("user_id")
+  userId          String        @map("user_id")      @db.Uuid
   user            User          @relation("UserMemberships", fields: [userId], references: [id])
 
-  organizationId  String        @map("organization_id")
+  organizationId  String        @map("organization_id") @db.Uuid
   organization    Organization  @relation(fields: [organizationId], references: [id])
 
   role            EnumRole      @default(USER)
@@ -112,7 +114,7 @@ model Membership {
   joinedAt        DateTime      @default(now()) @map("joined_at")
   createdAt       DateTime      @default(now()) @map("created_at")
 
-  invitedBy       String?       @map("invited_by")
+  invitedBy       String?       @map("invited_by") @db.Uuid
   invitedByUser   User?         @relation("UserInvitations", fields: [invitedBy], references: [id])
 
   updatedAt       DateTime      @updatedAt @map("updated_at")
@@ -122,14 +124,14 @@ model Membership {
   @@index([organizationId])
   @@index([userId])
 
-  @@map('membership')
+  @@map("membership")
 }
 
 
 model Project {
   id              String        @id @default(uuid()) @db.Uuid
 
-  organizationId  String        @map("organization_id")
+  organizationId  String        @map("organization_id") @db.Uuid
   organization    Organization  @relation(fields: [organizationId], references: [id])
 
   name            String
@@ -137,7 +139,7 @@ model Project {
 
   status          EnumStatusProject   @default(ACTIVE)
   
-  createdBy       String        @map("created_by")
+  createdBy       String        @map("created_by") @db.Uuid
   createdByUser   User          @relation(fields: [createdBy], references: [id])
 
   createdAt       DateTime      @default(now()) @map("created_at")
@@ -154,10 +156,10 @@ model Project {
 model Task {
   id              String        @id @default(uuid()) @db.Uuid
 
-  organizationId  String        @map("organization_id")
+  organizationId  String        @map("organization_id") @db.Uuid
   organization    Organization  @relation(fields: [organizationId], references: [id])
 
-  projectId       String        @map("project_id")
+  projectId       String        @map("project_id")  @db.Uuid
   project         Project       @relation(fields: [projectId], references: [id])
 
   title           String
@@ -165,10 +167,10 @@ model Task {
   status          EnumStatusTask @default(TODO)
   priority        EnumPriority   @default(MEDIUM)
 
-  assigneeId      String?       @map("assignee_id")
+  assigneeId      String?       @map("assignee_id") @db.Uuid
   assignee        User?         @relation("TaskAssignee", fields: [assigneeId], references: [id])
 
-  reporterId      String        @map("reporter_id")
+  reporterId      String        @map("reporter_id") @db.Uuid
   reporter        User          @relation("TaskReporter", fields: [reporterId], references: [id])
 
   dueDate         DateTime?     @map("due_date")
@@ -186,19 +188,20 @@ model Task {
   @@index([organizationId])
   @@index([projectId])
   @@index([assigneeId])
+  @@index([organizationId, projectId])
   @@unique([organizationId, idempotencyKey])
 }
 
 model Comment {
   id              String        @id @default(uuid()) @db.Uuid
 
-  organizationId  String        @map("organization_id")
+  organizationId  String        @map("organization_id") @db.Uuid
   organization    Organization  @relation(fields: [organizationId], references: [id])
 
-  taskId          String        @map("task_id")
+  taskId          String        @map("task_id") @db.Uuid
   task            Task          @relation(fields: [taskId], references: [id])
 
-  authorId        String        @map("author_id")
+  authorId        String        @map("author_id") @db.Uuid
   author          User          @relation(fields: [authorId], references: [id])
 
   content         String
@@ -214,17 +217,41 @@ model Comment {
 model RefreshToken {
   id                    String   @id @default(uuid()) @db.Uuid
 
-  userId                String   @map("user_id")
+  userId                String   @db.Uuid @map("user_id") 
   user                  User     @relation("UserRefreshTokens", fields: [userId], references: [id])
 
   tokenHash             String   @map("token_hash")
   expiresAt             DateTime @map("expires_at")
   revokedAt             DateTime? @map("revoked_at")
 
-  replacedByTokenId     String?  @map("replaced_by_token_id")
-  replacedBy            RefreshToken? @relation("TokenReplacement", fields: [replacedByTokenId], references: [id])
+  replacedByTokenId String? @map("replaced_by_token_id") @db.Uuid
+  replacedBy RefreshToken? @relation("TokenReplacement", fields: [replacedByTokenId], references: [id])
+  replaces RefreshToken[] @relation("TokenReplacement")
 
   createdAt             DateTime @default(now()) @map("created_at")
 
   @@index([userId])
+}
+
+model AuditLog {
+  id              String        @id @default(uuid()) @db.Uuid
+
+  organizationId  String        @db.Uuid @map("organization_id")  
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+
+  userId          String?       @map("user_id")  @db.Uuid
+  user            User?         @relation(fields: [userId], references: [id])
+
+  action          String   // ex: TASK_CREATED
+  entityType      String        @map("entity_type") // ex: TASK
+  entityId        String?       @map("entity_id")
+
+  metadata        Json?
+
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([organizationId, createdAt])
 }
