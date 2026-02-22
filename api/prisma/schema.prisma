@@ -1,0 +1,230 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EnumRole {
+  ADMIN
+  MANAGER
+  USER
+}
+
+enum EnumStatus { 
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+enum EnumStatusProject { 
+  ACTIVE
+  ARCHIVED
+}
+
+enum EnumPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum EnumStatusTask {
+  TODO
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+enum EnumPriority {
+  LOW 
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  email          String   @unique
+  passwordHash   String   @map("password_hash")
+  name           String
+  avatar         String?
+  isActive       Boolean  @map("is_active") @default(true)
+  emailVerified  Boolean  @default(false)
+  lastLoginAt    DateTime? @map("last_login_at")
+
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  memberships         Membership[]    @relation("UserMemberships")
+  invitedMemberships  Membership[]    @relation("UserInvitations")
+  ownedOrgs           Organization[]  
+  projects            Project[]
+  assignedTasks       Task[]          @relation("TaskAssignee")
+  reportedTasks       Task[]          @relation("TaskReporter")
+  comments            Comment[]
+  refreshTokens       RefreshToken[]  @relation("UserRefreshTokens")
+}
+
+model Organization {
+  id            String     @id @default(uuid()) @db.Uuid
+  name          String
+  slug          String     @unique
+  plan          EnumPlan   @default(FREE)
+  isActive      Boolean    @map("is_active") @default(true)
+
+  ownerUserId   String     @map("owner_user_id")
+  owner         User       @relation(fields: [ownerUserId], references: [id])
+
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  deletedAt     DateTime?  @map("deleted_at")
+
+  memberships   Membership[]
+  tasks         Task[]
+  projects      Project[]    
+  comments      Comment[]
+}
+
+
+
+model Membership {
+  id              String        @id @default(uuid()) @db.Uuid
+
+  userId          String        @map("user_id")
+  user            User          @relation("UserMemberships", fields: [userId], references: [id])
+
+  organizationId  String        @map("organization_id")
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+
+  role            EnumRole      @default(USER)
+  status          EnumStatus    @default(ACTIVE)
+
+  joinedAt        DateTime      @default(now()) @map("joined_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  invitedBy       String?       @map("invited_by")
+  invitedByUser   User?         @relation("UserInvitations", fields: [invitedBy], references: [id])
+
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  deletedAt       DateTime?     @map("deleted_at")
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@index([userId])
+
+  @@map('membership')
+}
+
+
+model Project {
+  id              String        @id @default(uuid()) @db.Uuid
+
+  organizationId  String        @map("organization_id")
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+
+  name            String
+  description     String?
+
+  status          EnumStatusProject   @default(ACTIVE)
+  
+  createdBy       String        @map("created_by")
+  createdByUser   User          @relation(fields: [createdBy], references: [id])
+
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  deletedAt       DateTime?     @map("deleted_at")
+
+  tasks           Task[]
+
+  @@index([organizationId])
+  @@unique([organizationId, name])
+}
+
+
+model Task {
+  id              String        @id @default(uuid()) @db.Uuid
+
+  organizationId  String        @map("organization_id")
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+
+  projectId       String        @map("project_id")
+  project         Project       @relation(fields: [projectId], references: [id])
+
+  title           String
+  description     String?
+  status          EnumStatusTask @default(TODO)
+  priority        EnumPriority   @default(MEDIUM)
+
+  assigneeId      String?       @map("assignee_id")
+  assignee        User?         @relation("TaskAssignee", fields: [assigneeId], references: [id])
+
+  reporterId      String        @map("reporter_id")
+  reporter        User          @relation("TaskReporter", fields: [reporterId], references: [id])
+
+  dueDate         DateTime?     @map("due_date")
+  completedAt     DateTime?     @map("completed_at")
+
+  position        Int?
+  idempotencyKey  String?       @map("idempotency_key")
+
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  deletedAt       DateTime?     @map("deleted_at")
+
+  comments        Comment[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([assigneeId])
+  @@unique([organizationId, idempotencyKey])
+}
+
+model Comment {
+  id              String        @id @default(uuid()) @db.Uuid
+
+  organizationId  String        @map("organization_id")
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+
+  taskId          String        @map("task_id")
+  task            Task          @relation(fields: [taskId], references: [id])
+
+  authorId        String        @map("author_id")
+  author          User          @relation(fields: [authorId], references: [id])
+
+  content         String
+
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  deletedAt       DateTime?     @map("deleted_at")
+
+  @@index([taskId])
+  @@index([organizationId])
+}
+
+model RefreshToken {
+  id                    String   @id @default(uuid()) @db.Uuid
+
+  userId                String   @map("user_id")
+  user                  User     @relation("UserRefreshTokens", fields: [userId], references: [id])
+
+  tokenHash             String   @map("token_hash")
+  expiresAt             DateTime @map("expires_at")
+  revokedAt             DateTime? @map("revoked_at")
+
+  replacedByTokenId     String?  @map("replaced_by_token_id")
+  replacedBy            RefreshToken? @relation("TokenReplacement", fields: [replacedByTokenId], references: [id])
+
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+}
