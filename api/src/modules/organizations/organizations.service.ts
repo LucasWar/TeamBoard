@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { OrganizationRepository } from 'src/shared/database/repositories/organization.repository';
@@ -10,8 +10,17 @@ import { EnumRole, EnumStatus } from '@prisma/client';
 export class OrganizationsService {
   constructor(private readonly organizationRepo: OrganizationRepository) {}
 
-  async create(createOrganizationDto: CreateOrganizationDto, user: AuthUser) {
+  async create(
+    createOrganizationDto: CreateOrganizationDto,
+    user: AuthUser | undefined,
+  ) {
     const { name } = createOrganizationDto;
+
+    if (!user) {
+      throw new UnauthorizedException(
+        'É necessário esta logado para essa operação',
+      );
+    }
 
     const slug = await this.createAndValidateSlug(name);
 
