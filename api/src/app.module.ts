@@ -6,6 +6,8 @@ import { UsersModule } from './modules/users/users.module';
 import { DatabaseModule } from './shared/database/database.module';
 import { RefreshTokenModule } from './modules/refresh-token/refresh-token.module';
 import { ConfigModule } from '@nestjs/config';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { MembershipsModule } from './modules/memberships/memberships.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
       isGlobal: true, // 👈 MUITO importante
     }),
+    OrganizationsModule,
+    MembershipsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
