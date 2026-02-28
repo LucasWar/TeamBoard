@@ -7,22 +7,23 @@ on:
     branches: [ "main" ]
 
 jobs:
-  runs-on: ubuntu-latest
+  api:
+    runs-on:  ubuntu-latest
 
-  steps:
-    - name: Import ptoject
-    - uses: actions/checkout@v4
-    - name: Use Node.js 24.x
-      uses: actions/setup-node@v4
-      with:
-        node-version: '24.x'
-        cache: 'npm'
+    steps:
+      - name: Import ptoject
+      - uses: actions/checkout@v4
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'npm'
 
-    - name: Install dependences
-    - run: npm ci
+      - name: Install dependences
+      - run: npm ci
 
-    - name: Eslint verification 
-    - run:  npm run ci:lint
+      - name: Eslint verification 
+      - run:  npm run ci:lint
 
-    - name: Jest test
-    - run:  npm run ci:test
+      - name: Jest test
+      - run:  npm run ci:test
