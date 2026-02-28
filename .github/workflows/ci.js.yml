@@ -18,6 +18,7 @@ jobs:
         with:
           node-version: '24.x'
           cache: 'npm'
+          cache-dependency-path: './api/package-lock.json'
 
       - name: Install dependences
         run: npm ci
