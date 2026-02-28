@@ -21,9 +21,12 @@ jobs:
 
       - name: Install dependences
         run: npm ci
+        working-directory: ./api
 
       - name: Eslint verification 
         run:  npm run ci:lint
+        working-directory: ./api
 
       - name: Jest test
-        run:  npm run ci:test
+        run:  npm run ci:test]
+        working-directory: ./api
