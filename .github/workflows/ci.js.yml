@@ -20,10 +20,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependences
-      - run: npm ci
+        run: npm ci
 
       - name: Eslint verification 
-      - run:  npm run ci:lint
+        run:  npm run ci:lint
 
       - name: Jest test
-      - run:  npm run ci:test
+        run:  npm run ci:test
