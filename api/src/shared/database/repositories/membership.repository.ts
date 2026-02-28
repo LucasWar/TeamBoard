@@ -1,7 +1,10 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma.service';
+import { type Prisma } from '@prisma/client';
 
+@Injectable()
 export class MembershipsRepository {
-  constructor(private readonly prismaService: PrismaClient) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   create(createDto: Prisma.MembershipCreateArgs) {
     return this.prismaService.membership.create(createDto);

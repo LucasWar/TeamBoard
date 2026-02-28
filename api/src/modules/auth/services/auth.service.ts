@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { LoginDto } from '../dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../../users/users.service';
@@ -7,6 +11,8 @@ import { randomUUID } from 'crypto';
 import * as crypto from 'crypto';
 import { RefreshTokenService } from '../../refresh-token/refresh-token.service';
 import { CreateRefreshTokenDto } from 'src/shared/dto/create-refresh-token.dto';
+import { RegisterDto } from '../dto/login.dto copy';
+import { AuditLogService } from 'src/modules/audit-log/audit-log.service';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +20,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly userService: UsersService,
     private readonly refreshTokenService: RefreshTokenService,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   private hashToken(token: string): string {
@@ -24,6 +31,10 @@ export class AuthService {
     const { email, password } = loginDto;
 
     const user = await this.userService.findOneByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('Usuário não encontrado');
+    }
 
     if (!user.isActive) {
       throw new UnauthorizedException(
@@ -51,6 +62,12 @@ export class AuthService {
     };
 
     await this.refreshTokenService.create(refreshTokenDto);
+
+    await this.auditLogService.logAction({
+      action: 'USER_LOGIN',
+      userId: user.id,
+      metadata: { email: user.email },
+    });
 
     return tokens;
   }
@@ -88,5 +105,16 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('Refresh inválido');
     }
+  }
+
+  async register(registerDto: RegisterDto) {
+    const newUser = await this.userService.create(
+      registerDto.email,
+      registerDto.name,
+      registerDto.password,
+      registerDto.avatar,
+    );
+
+    return newUser;
   }
 }

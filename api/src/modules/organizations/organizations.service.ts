@@ -42,8 +42,8 @@ export class OrganizationsService {
     return organization;
   }
 
-  findAll() {
-    return `This action returns all organizations`;
+  async findAll() {
+    return this.organizationRepo.findMany();
   }
 
   findOne(id: number) {
@@ -70,6 +70,8 @@ export class OrganizationsService {
       },
       select: { slug: true },
     });
+
+    console.log(baseSlug);
 
     if (existingSlugs.length === 0) {
       return baseSlug;

@@ -1,15 +1,40 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 // import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from 'src/shared/database/repositories/user.repository';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly userRepo: UserRepository) {}
 
-  // create(createUserDto: CreateUserDto) {
-  //   return 'This action adds a new user';
-  // }
+  async create(email: string, name: string, password: string, avatar: string) {
+    const uniqueEmail = await this.findOneByEmail(email);
+
+    if (uniqueEmail) {
+      throw new ConflictException('Email já cadastrado');
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const newUser = await this.userRepo.create({
+      data: {
+        name,
+        email,
+        passwordHash,
+        avatar,
+      },
+      omit: {
+        passwordHash: true,
+      }
+    });
+
+    return newUser;
+  }
 
   // findAll() {
   //   return `This action returns all users`;
@@ -35,10 +60,6 @@ export class UsersService {
         email,
       },
     });
-
-    if (!user) {
-      throw new NotFoundException('Usuário não encontrado');
-    }
 
     return user;
   }

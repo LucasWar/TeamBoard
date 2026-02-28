@@ -6,6 +6,7 @@ import { RefreshTokenRepository } from './repositories/refresh-token.repository'
 import { TransactionManager } from './transaction.manager';
 import { OrganizationRepository } from './repositories/organization.repository';
 import { MembershipsRepository } from './repositories/membership.repository';
+import { AuditLogRepository } from './repositories/audit-log.repository copy';
 
 @Global()
 @Module({
@@ -17,6 +18,7 @@ import { MembershipsRepository } from './repositories/membership.repository';
     TransactionManager,
     OrganizationRepository,
     MembershipsRepository,
+    AuditLogRepository,
   ],
   exports: [
     UserRepository,
@@ -25,6 +27,7 @@ import { MembershipsRepository } from './repositories/membership.repository';
     TransactionManager,
     OrganizationRepository,
     MembershipsRepository,
+    AuditLogRepository,
   ],
 })
 export class DatabaseModule {}

@@ -8,6 +8,7 @@ import { RefreshTokenModule } from './modules/refresh-token/refresh-token.module
 import { ConfigModule } from '@nestjs/config';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { MembershipsModule } from './modules/memberships/memberships.module';
+import { AuditLogModule } from './modules/audit-log/audit-log.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MembershipsModule } from './modules/memberships/memberships.module';
     }),
     OrganizationsModule,
     MembershipsModule,
+    AuditLogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

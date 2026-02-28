@@ -7,10 +7,14 @@ import {
   HttpCode,
   Req,
   UnauthorizedException,
+  Get,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
 import { LoginDto } from './dto/login.dto';
 import type { Response, Request } from 'express';
+import { RegisterDto } from './dto/login.dto copy';
+import { AuditInterceptor } from 'src/shared/interceptors/audit.interceptor';
 
 @Controller('auth')
 export class AuthController {
@@ -26,6 +30,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @UseInterceptors(AuditInterceptor)
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() loginDto: LoginDto,
@@ -40,7 +45,16 @@ export class AuthController {
     };
   }
 
-  @Post('refresh')
+  @Post('register')
+  @HttpCode(HttpStatus.OK)
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return await this.authService.register(registerDto);
+  }
+
+  @Get('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(
     @Req() req: Request,

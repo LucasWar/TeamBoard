@@ -15,9 +15,11 @@ import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { AuthUser } from 'src/shared/interfaces/auth-user.interface';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OrganizationGuard } from 'src/shared/guards/organization.guard';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { Roles } from 'src/shared/decorators/role.decorator';
 
 @Controller('organizations')
-@UseGuards(JwtAuthGuard, OrganizationGuard)
+@UseGuards(JwtAuthGuard)
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
@@ -30,16 +32,20 @@ export class OrganizationsController {
   }
 
   @Get()
+  @Roles('USER')
+  @UseGuards(OrganizationGuard, RolesGuard)
   findAll() {
     return this.organizationsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.organizationsService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.organizationsService.findOne(+id);
+  // }
 
   @Patch(':id')
+  @Roles('ADMIN')
+  @UseGuards(OrganizationGuard, RolesGuard)
   update(
     @Param('id') id: string,
     @Body() updateOrganizationDto: UpdateOrganizationDto,

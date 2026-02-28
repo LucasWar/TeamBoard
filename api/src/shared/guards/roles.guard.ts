@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/role.decorator';
-import { Membership } from '@prisma/client';
+import { EnumRole, Membership } from '@prisma/client';
 
 export interface MembershipRequest extends Request {
   membership: Membership;
@@ -35,6 +35,10 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException(
         'Associação com a organização não encontrada.',
       );
+    }
+
+    if (membership.role == EnumRole.ADMIN) {
+      return true;
     }
 
     const hasRole = requiredRoles.includes(membership.role);
