@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
-import { UpdateOrganizationDto } from './dto/update-organization.dto';
+// import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { OrganizationRepository } from 'src/shared/database/repositories/organization.repository';
 import { generateSlug } from 'src/shared/utils/generate-slug';
 import { AuthUser } from 'src/shared/interfaces/auth-user.interface';
@@ -10,10 +10,7 @@ import { EnumRole, EnumStatus } from '@prisma/client';
 export class OrganizationsService {
   constructor(private readonly organizationRepo: OrganizationRepository) {}
 
-  async create(
-    createOrganizationDto: CreateOrganizationDto,
-    user: AuthUser | undefined,
-  ) {
+  async create(createOrganizationDto: CreateOrganizationDto, user: AuthUser) {
     const { name } = createOrganizationDto;
 
     if (!user) {
@@ -50,9 +47,9 @@ export class OrganizationsService {
     return `This action returns a #${id} organization`;
   }
 
-  update(id: number, updateOrganizationDto: UpdateOrganizationDto) {
-    return `This action updates a #${id} organization`;
-  }
+  // update(id: number, updateOrganizationDto: UpdateOrganizationDto) {
+  //   return `This action updates a #${id} organization`;
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} organization`;
@@ -70,8 +67,6 @@ export class OrganizationsService {
       },
       select: { slug: true },
     });
-
-    console.log(baseSlug);
 
     if (existingSlugs.length === 0) {
       return baseSlug;

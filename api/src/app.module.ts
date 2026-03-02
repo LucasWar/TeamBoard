@@ -17,7 +17,7 @@ import { AuditLogModule } from './modules/audit-log/audit-log.module';
     DatabaseModule,
     RefreshTokenModule,
     ConfigModule.forRoot({
-      isGlobal: true, // 👈 MUITO importante
+      isGlobal: true,
     }),
     OrganizationsModule,
     MembershipsModule,

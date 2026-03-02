@@ -13,6 +13,7 @@ import { RefreshTokenService } from '../../refresh-token/refresh-token.service';
 import { CreateRefreshTokenDto } from 'src/shared/dto/create-refresh-token.dto';
 import { RegisterDto } from '../dto/login.dto copy';
 import { AuditLogService } from 'src/modules/audit-log/audit-log.service';
+import { JwtPayload } from '../interfaces/jwt.interface';
 
 @Injectable()
 export class AuthService {
@@ -95,9 +96,10 @@ export class AuthService {
 
   async refresh(refreshToken: string) {
     try {
-      const payload = await this.jwtService.verifyAsync(refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET,
-      });
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(
+        refreshToken,
+        { secret: process.env.JWT_REFRESH_SECRET },
+      );
 
       const tokens = await this.generateTokens(payload.sub, '');
 

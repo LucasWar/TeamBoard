@@ -30,7 +30,7 @@ export class UsersService {
       },
       omit: {
         passwordHash: true,
-      }
+      },
     });
 
     return newUser;

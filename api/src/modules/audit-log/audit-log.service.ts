@@ -11,7 +11,7 @@ export class AuditLogService {
     const { action, entityId, entityType, metadata, organizationId, userId } =
       createAuditLogDto;
     try {
-      await this.auditLogRepo.create({
+      const log = await this.auditLogRepo.create({
         data: {
           action,
           entityType,
@@ -21,10 +21,13 @@ export class AuditLogService {
           userId,
         },
       });
+      return log;
     } catch (error) {
+      const errorTrace = error instanceof Error ? error.stack : String(error);
+
       this.logger.error(
         `Falha ao gravar AuditLog: ${createAuditLogDto.action}`,
-        error.stack,
+        errorTrace,
       );
     }
   }
