@@ -1,98 +1,52 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🚀 TeamBoard API - B2B SaaS Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Este é o repositório do backend (API) do **TeamBoard**, um sistema de gestão de projetos e tarefas (Kanban) construído com arquitetura **Multi-tenant B2B**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A API foi desenvolvida com foco extremo em segurança, isolamento de dados entre empresas (Tenants) e rastreabilidade, utilizando as melhores práticas de Engenharia de Software para aplicações corporativas.
 
-## Description
+## 🧠 Decisões Arquiteturais e Pontos Fortes
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Ao contrário de CRUDS tradicionais, esta API foi arquitetada para suportar múltiplos clientes (empresas) na mesma infraestrutura sem risco de vazamento de dados (*Cross-Tenant Data Leakage*). 
 
-## Project setup
+### 1. Arquitetura Multi-tenant (Single Database)
+* **Isolamento Lógico:** Todas as requisições autenticadas exigem a passagem do contexto da organização (via header `x-organization-id`).
+* **Segurança contra IDOR:** Todos os *Services* (Projetos, Tarefas, Comentários) validam ativamente se o recurso solicitado pertence à organização injetada no contexto da requisição. Nenhuma entidade pode ser acessada ou mutada fora do escopo do Tenant.
+* **Desnormalização Consciente:** Entidades filhas (como `Task` e `Comment`) possuem o `organizationId` diretamente em suas tabelas para otimização de queries e garantia de isolamento em nível de banco de dados.
 
-```bash
-$ npm install
-```
+### 2. Segurança e Autenticação (Dual-Token Pattern)
+* **JWT Access Token (Stateless):** Tokens de curta duração (ex: 15 min) para operações de alta performance sem onerar o banco de dados.
+* **Refresh Token Rotation (Stateful):** Tokens de longa duração mantidos em cookies `HttpOnly`. A cada renovação, o token antigo é revogado e um novo é gerado, neutralizando ataques de roubo de sessão e permitindo invalidação remota.
 
-## Compile and run the project
+### 3. Controle de Acesso Baseado em Cargos (RBAC)
+* **Design Pattern:** Implementação via *Guards* nativos do NestJS (`OrganizationGuard` e `RolesGuard`).
+* **Execução Limpa:** O Controller não possui lógica de autorização. O controle é feito via *Custom Decorators* (ex: `@Roles('ADMIN', 'MANAGER')`), tornando as rotas semânticas e o código *DRY* (Don't Repeat Yourself).
+* **Global User com Nested Memberships:** A identidade do usuário é global, mas suas permissões são relativas à Organização que ele está acessando no momento.
 
-```bash
-# development
-$ npm run start
+### 4. Trilha de Auditoria Automática (Audit Log)
+* O sistema possui um `AuditLogService` global com estratégia *Fire-and-Forget* (assíncrona) para não bloquear a latência da resposta ao cliente (UX).
+* **Interceptor Genérico:** Um *NestInterceptor* captura automaticamente todas as requisições de mutação (`POST`, `PUT`, `PATCH`, `DELETE`) e registra metadados cruciais (IP, Payload, Action, User) para compliance.
 
-# watch mode
-$ npm run start:dev
+### 5. Resiliência e Integridade de Dados
+* **Chaves de Idempotência:** A entidade `Task` possui uma `idempotencyKey` atrelada a uma *constraint* de unicidade no banco, garantindo que falhas de rede do frontend não gerem tarefas duplicadas.
+* **Soft Delete:** Remoções de entidades críticas (Projetos e Tarefas) não executam `DELETE` no banco de dados. Utilizamos `deletedAt` para preservar a integridade referencial e o histórico de auditoria.
+* **Transações ACID:** Operações complexas, como o reordenamento de cards no Kanban (atualização em cascata de posições), são envelopadas em transações (`$transaction` do Prisma) para evitar estados inconsistentes.
 
-# production mode
-$ npm run start:prod
-```
+## 🛠️ Stack Tecnológico
 
-## Run tests
+* **Framework:** [NestJS](https://nestjs.com/) (Node.js com TypeScript Estrito)
+* **Banco de Dados:** PostgreSQL
+* **ORM:** [Prisma](https://www.prisma.io/) (com schema otimizado e índices compostos)
+* **Autenticação:** Passport.js, JWT, bcrypt
+* **Validação:** class-validator e class-transformer
 
-```bash
-# unit tests
-$ npm run test
+## 🗄️ Modelagem de Dados (High-Level)
+* `User` (Global) <-> `Membership` (Cargo) <-> `Organization` (Tenant)
+* `Organization` -> `Project` -> `Task` -> `Comment`
+* `AuditLog` (Tabela apendável para rastreabilidade de eventos de negócio)
 
-# e2e tests
-$ npm run test:e2e
+## 🚀 Como rodar o projeto localmente
 
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+1. Clone o repositório e navegue até a pasta `/api`.
+2. Instale as dependências:
+   ```bash
+   npm install

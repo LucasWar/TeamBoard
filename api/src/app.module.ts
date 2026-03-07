@@ -9,6 +9,9 @@ import { ConfigModule } from '@nestjs/config';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { MembershipsModule } from './modules/memberships/memberships.module';
 import { AuditLogModule } from './modules/audit-log/audit-log.module';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { TasksModule } from './modules/tasks/tasks.module';
+import { CommentsModule } from './modules/comments/comments.module';
 
 @Module({
   imports: [
@@ -22,6 +25,9 @@ import { AuditLogModule } from './modules/audit-log/audit-log.module';
     OrganizationsModule,
     MembershipsModule,
     AuditLogModule,
+    ProjectsModule,
+    TasksModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,9 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Request } from 'express';
-
-interface CurrentOrgId extends Request {
-  currentOrgId: string;
-}
+import { CurrentOrgId } from '../interfaces/current-org-id';
 
 export const CurrentOrg = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): string => {

@@ -7,6 +7,8 @@ import { TransactionManager } from './transaction.manager';
 import { OrganizationRepository } from './repositories/organization.repository';
 import { MembershipsRepository } from './repositories/membership.repository';
 import { AuditLogRepository } from './repositories/audit-log.repository copy';
+import { TasksRepository } from './repositories/tasks.repository';
+import { ProjectsRepository } from './repositories/tasks.repository copy';
 
 @Global()
 @Module({
@@ -19,6 +21,8 @@ import { AuditLogRepository } from './repositories/audit-log.repository copy';
     OrganizationRepository,
     MembershipsRepository,
     AuditLogRepository,
+    TasksRepository,
+    ProjectsRepository,
   ],
   exports: [
     UserRepository,
@@ -28,6 +32,8 @@ import { AuditLogRepository } from './repositories/audit-log.repository copy';
     OrganizationRepository,
     MembershipsRepository,
     AuditLogRepository,
+    TasksRepository,
+    ProjectsRepository,
   ],
 })
 export class DatabaseModule {}

@@ -14,6 +14,10 @@ export class MembershipsRepository {
     return this.prismaService.membership.findUnique(findDto);
   }
 
+  findFirst(findDto: Prisma.MembershipFindFirstArgs) {
+    return this.prismaService.membership.findFirst(findDto);
+  }
+
   update(updateDto: Prisma.MembershipUpdateArgs) {
     return this.prismaService.membership.update(updateDto);
   }

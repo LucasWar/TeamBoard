@@ -10,7 +10,10 @@ import { EnumRole, EnumStatus } from '@prisma/client';
 export class OrganizationsService {
   constructor(private readonly organizationRepo: OrganizationRepository) {}
 
-  async create(createOrganizationDto: CreateOrganizationDto, user: AuthUser) {
+  async create(
+    createOrganizationDto: CreateOrganizationDto,
+    user: AuthUser | undefined,
+  ) {
     const { name } = createOrganizationDto;
 
     if (!user) {
@@ -55,7 +58,6 @@ export class OrganizationsService {
     return `This action removes a #${id} organization`;
   }
 
-  //TALVEZ IMPLEMENTAR UM ALGORIMO DE ORDENAÇÃO NOS REGISTROS POSSA TORNAR A BUSCA MAIS RÁPIDA ? LEMBRAR DE TESTAR
   private async createAndValidateSlug(name: string) {
     const baseSlug = generateSlug(name);
 

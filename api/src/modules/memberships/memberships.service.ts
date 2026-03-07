@@ -114,4 +114,20 @@ export class MembershipsService {
       },
     });
   }
+
+  async verifyUserInOrg(userId: string, organizationId: string) {
+    const membership = await this.membershipRepo.findUnique({
+      where: {
+        userId_organizationId: {
+          organizationId,
+          userId,
+        },
+      },
+    });
+    if (!membership) {
+      throw new BadRequestException(
+        'O usuário atribuído não pertence a esta organização.',
+      );
+    }
+  }
 }
