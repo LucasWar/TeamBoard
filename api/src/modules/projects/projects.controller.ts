@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -17,6 +18,7 @@ import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from 'src/shared/decorators/role.decorator';
 import { CurrentOrg } from 'src/shared/decorators/current-organization.decorator';
+import { FilterProjectDto } from './dto/filter-project.dto';
 
 @Controller('projects')
 @UseGuards(JwtAuthGuard, OrganizationGuard, RolesGuard)
@@ -34,8 +36,9 @@ export class ProjectsController {
   }
 
   @Get()
-  findAll(@CurrentOrg() orgId: string) {
-    return this.projectsService.findAllByOrg(orgId);
+  findAll(@Query() filter: FilterProjectDto, @CurrentOrg() orgId: string) {
+    console.log(filter);
+    return this.projectsService.findAllByOrg(orgId, filter);
   }
 
   @Patch(':id')

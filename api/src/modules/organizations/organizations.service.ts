@@ -5,10 +5,14 @@ import { OrganizationRepository } from 'src/shared/database/repositories/organiz
 import { generateSlug } from 'src/shared/utils/generate-slug';
 import { AuthUser } from 'src/shared/interfaces/auth-user.interface';
 import { EnumRole, EnumStatus } from '@prisma/client';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class OrganizationsService {
-  constructor(private readonly organizationRepo: OrganizationRepository) {}
+  constructor(
+    private readonly organizationRepo: OrganizationRepository,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   async create(
     createOrganizationDto: CreateOrganizationDto,
@@ -46,13 +50,17 @@ export class OrganizationsService {
     return this.organizationRepo.findMany();
   }
 
+  async sumarryDashboard(orgId: string, userId: string) {
+    const recentLogs = await this.auditLogService.findAll(orgId);
+
+    const formartRecentLogs = this.formatActivityFeed(recentLogs, userId);
+
+    return formartRecentLogs;
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} organization`;
   }
-
-  // update(id: number, updateOrganizationDto: UpdateOrganizationDto) {
-  //   return `This action updates a #${id} organization`;
-  // }
 
   remove(id: number) {
     return `This action removes a #${id} organization`;
@@ -99,5 +107,48 @@ export class OrganizationsService {
     }
 
     return `${baseSlug}-${maxSuffix}`;
+  }
+
+  private formatActivityFeed(logs: any[], currentUserId: string) {
+    return logs.map(log => {
+      const actorName = log.userId === currentUserId ? 'Você' : log.user.name;
+      const metadata = log.metadata || {}; // O JSON que gravamos lá atrás
+
+      let description = '';
+
+      switch (log.action) {
+        case 'PROJECT_CREATED':
+          description = `criou o projeto "${metadata.projectName}".`;
+          break;
+
+        case 'PROJECT_ARCHIVED':
+          description = `arquivou um projeto.`;
+          break;
+
+        case 'TASK_CREATED':
+          description = `criou a tarefa "${metadata.title}".`;
+          break;
+
+        case 'TASK_STATUS_CHANGED':
+          description = `moveu uma tarefa para a coluna ${metadata.newStatus}.`;
+          break;
+
+        case 'COMMENT_CREATED':
+          description = `comentou em uma tarefa.`;
+          break;
+
+        default:
+          description = `realizou uma alteração no sistema.`;
+      }
+
+      return {
+        id: log.id,
+        actor: actorName,
+        actorAvatar: log.user.avatar,
+        description: description,
+        fullText: `${actorName} ${description}`,
+        createdAt: log.createdAt,
+      };
+    });
   }
 }

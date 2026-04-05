@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/shared/database/prisma.service';
 import { AuditLogService } from 'src/modules/audit-log/audit-log.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { TasksService } from '../tasks/tasks.service';
+import { CommentsRepository } from 'src/shared/database/repositories/comments.repository';
 
 @Injectable()
 export class CommentsService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly commentRepo: CommentsRepository,
+    private readonly taskService: TasksService,
     private readonly auditLogService: AuditLogService,
   ) {}
 
@@ -16,13 +18,10 @@ export class CommentsService {
     orgId: string,
     userId: string,
   ) {
-    const task = await this.prisma.task.findFirst({
-      where: {
-        id: taskId,
-        organizationId: orgId, // O cadeado mestre!
-        deletedAt: null,
-      },
-    });
+    const task = await this.taskService.findTaskByTaskIsOrganizationId(
+      taskId,
+      orgId,
+    );
 
     if (!task) {
       throw new NotFoundException(
@@ -30,7 +29,7 @@ export class CommentsService {
       );
     }
 
-    const comment = await this.prisma.comment.create({
+    const comment = await this.commentRepo.create({
       data: {
         content: dto.content,
         taskId: task.id,
@@ -60,7 +59,7 @@ export class CommentsService {
   }
 
   async findAllByTask(taskId: string, orgId: string) {
-    return this.prisma.comment.findMany({
+    return this.commentRepo.findMany({
       where: {
         taskId,
         organizationId: orgId,

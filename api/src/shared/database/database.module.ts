@@ -8,7 +8,8 @@ import { OrganizationRepository } from './repositories/organization.repository';
 import { MembershipsRepository } from './repositories/membership.repository';
 import { AuditLogRepository } from './repositories/audit-log.repository copy';
 import { TasksRepository } from './repositories/tasks.repository';
-import { ProjectsRepository } from './repositories/tasks.repository copy';
+import { ProjectsRepository } from './repositories/projects.repository';
+import { CommentsRepository } from './repositories/comments.repository';
 
 @Global()
 @Module({
@@ -23,6 +24,7 @@ import { ProjectsRepository } from './repositories/tasks.repository copy';
     AuditLogRepository,
     TasksRepository,
     ProjectsRepository,
+    CommentsRepository,
   ],
   exports: [
     UserRepository,
@@ -34,6 +36,7 @@ import { ProjectsRepository } from './repositories/tasks.repository copy';
     AuditLogRepository,
     TasksRepository,
     ProjectsRepository,
+    CommentsRepository,
   ],
 })
 export class DatabaseModule {}

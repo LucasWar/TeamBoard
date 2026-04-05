@@ -130,4 +130,8 @@ export class MembershipsService {
       );
     }
   }
+
+  async findAll() {
+    return await this.membershipRepo.findMany();
+  }
 }

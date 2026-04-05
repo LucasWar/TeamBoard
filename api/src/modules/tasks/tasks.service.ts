@@ -17,6 +17,7 @@ export class TasksService {
     private readonly auditLogService: AuditLogService,
     private readonly transactionManager: TransactionManager,
   ) {}
+
   async create(
     createTaskDto: CreateTaskDto,
     organizationId: string,
@@ -100,6 +101,93 @@ export class TasksService {
       orderBy: { position: 'asc' }, // Essencial para o Kanban renderizar certo
       include: {
         assignee: { select: { id: true, name: true, avatar: true } },
+      },
+    });
+  }
+
+  async countTasksByStatus(orgId: string) {
+    const result = await this.taskRepo.groupBy({
+      by: ['status'],
+      where: {
+        organizationId: orgId,
+        deletedAt: null,
+      },
+      _count: {
+        status: true,
+      },
+    });
+
+    return result;
+  }
+
+  async myKpis(userId: string, orgId: string) {
+    const today = new Date();
+
+    const todayLocal = today.toLocaleDateString('sv-SE');
+
+    const lastSevenDays = new Date();
+    lastSevenDays.setDate(today.getDate() - 7);
+    lastSevenDays.setHours(0, 0, 0, 0);
+
+    const result = await this.taskRepo.findMany({
+      where: {
+        OR: [{ status: 'IN_PROGRESS' }, { status: 'TODO' }],
+        organizationId: orgId,
+        assigneeId: userId,
+        dueDate: {
+          lte: today,
+        },
+        project: {
+          status: 'ACTIVE',
+        }
+      },
+    });
+
+    const lastSevenDaysKpis = await this.taskRepo.findMany({
+      where: {
+        status: 'DONE',
+        organizationId: orgId,
+        assigneeId: userId,
+        completedAt: {
+          gte: lastSevenDays, // Maior ou igual a 7 dias atrás
+          lte: today,
+        },
+      },
+    });
+
+    const contagem = result.reduce(
+      (acc, { dueDate }) => {
+        const dataTarefaLocal = new Date(dueDate!).toLocaleDateString('sv-SE');
+
+        if (dataTarefaLocal === todayLocal) {
+          acc.forToday++;
+        } else {
+          acc.late++;
+        }
+
+        return acc;
+      },
+      { forToday: 0, late: 0 },
+    );
+
+    return {
+      ...contagem,
+      complets: lastSevenDaysKpis.length,
+    };
+  }
+
+  async getRecentTasksByPriority(userId: string, orgId: string) {
+    const tasks = await this.taskRepo.getRecentTasksByPriority(userId, orgId);
+
+    return tasks;
+  }
+
+  async findTaskByTaskIsOrganizationId(taskId: string, organizationId: string) {
+    return await this.taskRepo.findFirst({
+      where: {
+        id: taskId,
+        organizationId: organizationId,
+        deletedAt: null,
       },
     });
   }

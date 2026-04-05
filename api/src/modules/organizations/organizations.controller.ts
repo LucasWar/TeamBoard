@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OrganizationGuard } from 'src/shared/guards/organization.guard';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { Roles } from 'src/shared/decorators/role.decorator';
+import { CurrentOrg } from 'src/shared/decorators/current-organization.decorator';
 
 @Controller('organizations')
 @UseGuards(JwtAuthGuard)
@@ -35,6 +36,15 @@ export class OrganizationsController {
   @UseGuards(OrganizationGuard, RolesGuard)
   findAll() {
     return this.organizationsService.findAll();
+  }
+
+  @Get('summary')
+  @UseGuards(OrganizationGuard, RolesGuard)
+  sumarryDashboard(
+    @CurrentOrg() orgId: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.organizationsService.sumarryDashboard(orgId, userId);
   }
 
   // @Get(':id')

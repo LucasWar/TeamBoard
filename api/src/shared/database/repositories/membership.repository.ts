@@ -18,6 +18,10 @@ export class MembershipsRepository {
     return this.prismaService.membership.findFirst(findDto);
   }
 
+  findMany() {
+    return this.prismaService.membership.findMany();
+  }
+
   update(updateDto: Prisma.MembershipUpdateArgs) {
     return this.prismaService.membership.update(updateDto);
   }

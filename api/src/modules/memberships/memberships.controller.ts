@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
 import { MembershipsService } from './memberships.service';
 import { AddMembershipDTO } from './dto/add-membership.dto';
 import { CurrentOrg } from 'src/shared/decorators/current-organization.decorator';
@@ -21,10 +21,10 @@ export class MembershipsController {
     );
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.membershipsService.findAll();
-  // }
+  @Get()
+  findAll() {
+    return this.membershipsService.findAll();
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {

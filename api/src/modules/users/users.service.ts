@@ -45,13 +45,49 @@ export class UsersService {
       where: {
         id,
       },
+      select: {
+        name: true,
+        email: true,
+      },
     });
 
     if (!user) {
       throw new NotFoundException('Usuário não encontrado');
     }
 
-    return user;
+    return {
+      name: user.name,
+      email: user.email,
+    };
+  }
+
+  async getMyOrganizationsById(id: string) {
+    const user = await this.userRepo.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        memberships: {
+          select: {
+            organizationId: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    const result = user.memberships.map((m) => {
+      return {
+        organizationId: m.organizationId,
+        role: m.role,
+      };
+    });
+
+    return result;
   }
 
   async findOneByEmail(email: string) {

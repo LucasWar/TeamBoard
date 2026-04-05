@@ -14,7 +14,9 @@ export class ProjectsRepository {
     return this.prismaService.project.findUnique(findDto);
   }
 
-  findMany(findDto: Prisma.ProjectFindManyArgs) {
+  findMany<T extends Prisma.ProjectFindManyArgs>(
+    findDto: Prisma.SelectSubset<T, Prisma.CommentFindManyArgs>,
+  ) {
     return this.prismaService.project.findMany(findDto);
   }
 

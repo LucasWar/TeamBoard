@@ -73,13 +73,38 @@ export class AuthService {
     return tokens;
   }
 
+  async register(registerDto: RegisterDto) {
+    const newUser = await this.userService.create(
+      registerDto.email,
+      registerDto.name,
+      registerDto.password,
+      registerDto.avatar,
+    );
+    const tokens = await this.generateTokens(newUser.id, newUser.email);
+
+    const refreshTokenDto: CreateRefreshTokenDto = {
+      tokenHash: this.hashToken(tokens.refreshToken),
+      userId: newUser.id,
+    };
+
+    await this.refreshTokenService.create(refreshTokenDto);
+
+    await this.auditLogService.logAction({
+      action: 'USER_LOGIN',
+      userId: newUser.id,
+      metadata: { email: newUser.email },
+    });
+
+    return tokens;
+  }
+
   async generateTokens(userId: string, email: string) {
     const jti = randomUUID();
     const accessToken = await this.jwtService.signAsync(
       { sub: userId, email },
       {
         secret: process.env.JWT_ACCESS_SECRET,
-        expiresIn: '15m',
+        expiresIn: '1d',
       },
     );
 
@@ -107,16 +132,5 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('Refresh inválido');
     }
-  }
-
-  async register(registerDto: RegisterDto) {
-    const newUser = await this.userService.create(
-      registerDto.email,
-      registerDto.name,
-      registerDto.password,
-      registerDto.avatar,
-    );
-
-    return newUser;
   }
 }

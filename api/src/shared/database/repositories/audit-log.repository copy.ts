@@ -14,6 +14,10 @@ export class AuditLogRepository {
     return this.prismaService.auditLog.findUnique(findDto);
   }
 
+  findMany(findDto: Prisma.AuditLogFindManyArgs) {
+    return this.prismaService.auditLog.findMany(findDto);
+  }
+
   update(updateDto: Prisma.AuditLogUpdateArgs) {
     return this.prismaService.auditLog.update(updateDto);
   }

@@ -15,6 +15,12 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  app.enableCors({
+    origin: 'http://localhost:5173', // A porta do seu Vite
+    credentials: true, // 👈 ISSO AQUI permite o tráfego do cookie!
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();

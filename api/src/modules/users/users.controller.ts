@@ -1,14 +1,23 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import type { AuthUser } from 'src/shared/interfaces/auth-user.interface';
 
 @Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Post()
-  // create(@Body() createUserDto: CreateUserDto) {
-  //   return this.usersService.create(createUserDto);
-  // }
+  @Get('me')
+  async me(@CurrentUser() user: AuthUser) {
+    return await this.usersService.findOneById(user.userId);
+  }
+
+  @Get('myOrganizations')
+  async myOrganizations(@CurrentUser() user: AuthUser) {
+    return await this.usersService.getMyOrganizationsById(user.userId);
+  }
 
   // @Get()
   // findAll() {

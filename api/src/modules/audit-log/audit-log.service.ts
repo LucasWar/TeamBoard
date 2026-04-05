@@ -31,4 +31,23 @@ export class AuditLogService {
       );
     }
   }
+
+  async findAll(orgId: string) {
+    const recentLogs = await this.auditLogRepo.findMany({
+      where: {
+        organizationId: orgId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 5,
+      include: {
+        user: {
+          select: { name: true, avatar: true },
+        },
+      },
+    });
+
+    return recentLogs;
+  }
 }
