@@ -1,13 +1,15 @@
-import type { ComponentProps } from "react"
+import { forwardRef, type ComponentProps } from "react"
 interface InputProps extends ComponentProps<'input'> {
   name: string
+  error?: string
 }
 
-export function Input({name, placeholder, id, ...props}: InputProps) {
+export const Input = forwardRef<HTMLInputElement, InputProps>(({name, className, placeholder, id,error, ...props}, ref) => {
   const inputId = id ?? name;
   return (
     <div className="relative">
       <input 
+        ref={ref}
         name={name}
         id={inputId}
         {...props}
@@ -16,11 +18,11 @@ export function Input({name, placeholder, id, ...props}: InputProps) {
       /> 
       <label 
         htmlFor={inputId} 
-        //className="absolute left-3.25 top-3.5 pointer-events-none text-gray-700"
         className="absolute text-xs left-3.25 top-2 pointer-events-none text-gray-700 peer-placeholder-shown:text-base peer-placeholder-shown:top-3.5 transition-all"
       >
         {placeholder}
       </label>
+      {error && <span className="text-primary-red">{error}</span>}
     </div>
   )
-}
+})
