@@ -58,11 +58,8 @@ export class ProjectsService {
 
     const projects = await this.projectRepo.findMany({
       ...query,
-      where: {
-        organizationId: orgId,
-        deletedAt: null,
-      },
       select: {
+        id: true,
         name: true,
         description: true,
         organizationId: true,

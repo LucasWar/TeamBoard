@@ -139,7 +139,7 @@ export class TasksService {
         },
         project: {
           status: 'ACTIVE',
-        }
+        },
       },
     });
 
