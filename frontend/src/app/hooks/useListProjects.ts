@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { listProjects } from "../../services/projectsServices/listProjects";
+import { projectService } from "../../services/projectsServices";
+import type { listProjectsFilter } from "../../services/projectsServices/listProjects";
 
-export function useListProject(){
+export function useListProject(filter: listProjectsFilter){
   return useQuery({
-    queryKey: ['listProjects'],
-    queryFn: () => listProjects()
+    queryKey: ['listProjects',filter],
+    queryFn: () => projectService.listProjects(filter)
   })
 }
