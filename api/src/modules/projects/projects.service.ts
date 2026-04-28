@@ -9,12 +9,19 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectsRepository } from 'src/shared/database/repositories/projects.repository';
 import { FilterProjectDto } from './dto/filter-project.dto';
 import { ProjectQueryBuilder } from './builder/projects-query-builder';
+import { EnumStatusProject, Prisma } from '@prisma/client';
+import { ChangeStatusDto } from './dto/change-status.dto';
+import { TransactionManager } from 'src/shared/database/transaction.manager';
+type ProjectWithTasks = Prisma.ProjectGetPayload<{
+  select: { id: true; name: true; tasks: { select: { status: true } } };
+}>;
 
 @Injectable()
 export class ProjectsService {
   constructor(
     private readonly auditLogService: AuditLogService,
     private readonly projectRepo: ProjectsRepository,
+    private readonly trasactionHelper: TransactionManager,
   ) {}
 
   async create(dto: CreateProjectDto, orgId: string, userId: string) {
@@ -56,24 +63,35 @@ export class ProjectsService {
   async findAllByOrg(orgId: string, filter: FilterProjectDto) {
     const query = new ProjectQueryBuilder(filter, orgId).build();
 
-    const projects = await this.projectRepo.findMany({
-      ...query,
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        organizationId: true,
-        status: true,
-        tasks: {
+    let projects: ProjectWithTasks[] = [];
+    let totalResults = 0;
+    await this.trasactionHelper.transaction(async (tx) => {
+      projects = await this.projectRepo.findMany(
+        {
+          ...query,
           select: {
+            id: true,
+            name: true,
+            description: true,
+            organizationId: true,
             status: true,
+            tasks: {
+              select: {
+                status: true,
+              },
+            },
           },
+          orderBy: { createdAt: 'desc' },
         },
-      },
-      orderBy: { createdAt: 'desc' },
+        tx,
+      );
+
+      totalResults = await this.projectRepo.count({
+        where: query.where,
+      });
     });
 
-    return projects.map(({ tasks, ...project }) => {
+    const data = projects.map(({ tasks, ...project }) => {
       const tasksDone = tasks.reduce((acc, task) => {
         if (task.status == 'DONE') acc = acc + 1;
         return acc;
@@ -86,6 +104,19 @@ export class ProjectsService {
         progress,
       };
     });
+
+    const totalPages = Math.ceil(totalResults / filter.limit);
+
+    return {
+      data,
+      pagination: {
+        total: totalPages,
+        perPage: filter.limit,
+        page: filter.page,
+        hasNext: filter.page < totalPages,
+        hasPrev: filter.page > 1,
+      },
+    };
   }
 
   async update(
@@ -142,26 +173,59 @@ export class ProjectsService {
     return updatedProject;
   }
 
-  async archive(projectId: string, orgId: string, userId: string) {
+  async delete(projectId: string, orgId: string, userId: string) {
     const project = await this.verifyProjectOwnership(projectId, orgId);
 
     await this.projectRepo.update({
       where: { id: project.id },
       data: {
         deletedAt: new Date(),
-        status: 'ARCHIVED',
+        status: EnumStatusProject.DELETE,
       },
     });
 
     void this.auditLogService.logAction({
-      action: 'PROJECT_ARCHIVED',
+      action: 'PROJECT_DELETE',
       userId,
       organizationId: orgId,
       entityId: project.id,
       entityType: 'Project',
     });
 
-    return { message: 'Projeto arquivado com sucesso' };
+    return {
+      message: 'Projeto deletado com sucesso',
+    };
+  }
+
+  async changeStatus(
+    projectId: string,
+    orgId: string,
+    userId: string,
+    changeStatusDto: ChangeStatusDto,
+  ) {
+    const project = await this.verifyProjectOwnership(projectId, orgId);
+
+    const { status } = changeStatusDto;
+
+    await this.projectRepo.update({
+      where: { id: project.id },
+      data: {
+        updatedAt: new Date(),
+        status,
+      },
+    });
+
+    void this.auditLogService.logAction({
+      action: 'PROJECT_CHANGE_STATUS',
+      userId,
+      organizationId: orgId,
+      entityId: project.id,
+      entityType: 'Project',
+    });
+
+    return {
+      message: 'Status do projeto atualizado com sucesso',
+    };
   }
 
   async projectBelongsToOrganization(id: string, organizationId: string) {

@@ -9,12 +9,16 @@ import {
   UnauthorizedException,
   Get,
   UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
 import { LoginDto } from './dto/login.dto';
 import type { Response, Request } from 'express';
 import { RegisterDto } from './dto/login.dto copy';
 import { AuditInterceptor } from 'src/shared/interceptors/audit.interceptor';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { extname } from 'path';
+import { diskStorage } from 'multer';
 
 @Controller('auth')
 export class AuthController {
@@ -47,11 +51,34 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/users',
+        filename: (
+          req: Request, 
+          file: Express.Multer.File, 
+          callback: (error: Error | null, filename: string) => void
+        ) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          const filename = `${uniqueSuffix}${ext}`;
+          callback(null, filename);
+        },
+      }),
+    }),
+  )
   async register(
     @Body() registerDto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    const tokens = await this.authService.register(registerDto);
+    const dto: RegisterDto = {
+      ...registerDto,
+      avatar: file?.filename,
+    };
+
+    const tokens = await this.authService.register(dto);
 
     this.setRefreshTokenCookie(res, tokens.refreshToken);
 

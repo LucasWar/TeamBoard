@@ -6,11 +6,13 @@ import { generateSlug } from 'src/shared/utils/generate-slug';
 import { AuthUser } from 'src/shared/interfaces/auth-user.interface';
 import { EnumRole, EnumStatus } from '@prisma/client';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { MembershipsService } from '../memberships/memberships.service';
 
 @Injectable()
 export class OrganizationsService {
   constructor(
     private readonly organizationRepo: OrganizationRepository,
+    private readonly membershipsServ: MembershipsService,
     private readonly auditLogService: AuditLogService,
   ) {}
 
@@ -62,8 +64,21 @@ export class OrganizationsService {
     return `This action returns a #${id} organization`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} organization`;
+  async remove(id: string, userId: string) {
+    const member = await this.membershipsServ.getMembershipByUserAndOrg(
+      userId,
+      id,
+    );
+
+    if (!member) {
+      throw new UnauthorizedException('Usuário não pertence a organização');
+    }
+
+    await this.organizationRepo.delete({
+      where: {
+        id,
+      },
+    });
   }
 
   private async createAndValidateSlug(name: string) {
@@ -123,6 +138,10 @@ export class OrganizationsService {
 
         case 'PROJECT_ARCHIVED':
           description = `arquivou um projeto.`;
+          break;
+
+        case 'PROJECT_DELETE':
+          description = `deletou um projeto.`;
           break;
 
         case 'TASK_CREATED':

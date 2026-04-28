@@ -1,14 +1,14 @@
 import { EnumStatusProject } from '@prisma/client';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class FilterProjectDto {
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  page?: number;
+  page!: number;
 
   @IsOptional()
   @IsString()
-  limit?: number;
+  limit!: number;
 
   @IsOptional()
   @IsString()

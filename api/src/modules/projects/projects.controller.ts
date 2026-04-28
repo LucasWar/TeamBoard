@@ -19,6 +19,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from 'src/shared/decorators/role.decorator';
 import { CurrentOrg } from 'src/shared/decorators/current-organization.decorator';
 import { FilterProjectDto } from './dto/filter-project.dto';
+import { ChangeStatusDto } from './dto/change-status.dto';
 
 @Controller('projects')
 @UseGuards(JwtAuthGuard, OrganizationGuard, RolesGuard)
@@ -37,7 +38,6 @@ export class ProjectsController {
 
   @Get()
   findAll(@Query() filter: FilterProjectDto, @CurrentOrg() orgId: string) {
-    console.log(filter);
     return this.projectsService.findAllByOrg(orgId, filter);
   }
 
@@ -58,12 +58,28 @@ export class ProjectsController {
   }
 
   @Delete(':id')
-  @Roles('ADMIN') // 👈 Arquivar/Deletar é exclusividade do ADMIN
-  archive(
+  @Roles('ADMIN')
+  delte(
     @Param('id') projectId: string,
     @CurrentOrg() orgId: string,
     @CurrentUser('userId') userId: string,
   ) {
-    return this.projectsService.archive(projectId, orgId, userId);
+    return this.projectsService.delete(projectId, orgId, userId);
+  }
+
+  @Patch('changeStatus/:id')
+  @Roles('ADMIN', 'MENAGER')
+  changeStatus(
+    @Body() changeStatusDto: ChangeStatusDto,
+    @Param('id') projectId: string,
+    @CurrentOrg() orgId: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.projectsService.changeStatus(
+      projectId,
+      orgId,
+      userId,
+      changeStatusDto,
+    );
   }
 }

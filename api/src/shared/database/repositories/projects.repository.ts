@@ -15,9 +15,10 @@ export class ProjectsRepository {
   }
 
   findMany<T extends Prisma.ProjectFindManyArgs>(
-    findDto: Prisma.SelectSubset<T, Prisma.CommentFindManyArgs>,
+    findDto: Prisma.SelectSubset<T, Prisma.CommentFindManyArgs>, tx?: Prisma.TransactionClient,
   ) {
-    return this.prismaService.project.findMany(findDto);
+    const prisma = tx ? tx : this.prismaService;
+    return prisma.project.findMany(findDto);
   }
 
   findFirst(findDto: Prisma.ProjectFindFirstArgs) {

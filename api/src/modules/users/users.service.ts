@@ -12,7 +12,7 @@ import * as bcrypt from 'bcrypt';
 export class UsersService {
   constructor(private readonly userRepo: UserRepository) {}
 
-  async create(email: string, name: string, password: string, avatar: string) {
+  async create(email: string, name: string, password: string, avatar?: string) {
     const uniqueEmail = await this.findOneByEmail(email);
 
     if (uniqueEmail) {
@@ -48,6 +48,7 @@ export class UsersService {
       select: {
         name: true,
         email: true,
+        avatar: true,
       },
     });
 
@@ -55,10 +56,7 @@ export class UsersService {
       throw new NotFoundException('Usuário não encontrado');
     }
 
-    return {
-      name: user.name,
-      email: user.email,
-    };
+    return user;
   }
 
   async getMyOrganizationsById(id: string) {
@@ -71,6 +69,11 @@ export class UsersService {
           select: {
             organizationId: true,
             role: true,
+            organization: {
+              select: {
+                name: true,
+              }
+            }
           },
         },
       },
@@ -82,6 +85,7 @@ export class UsersService {
 
     const result = user.memberships.map((m) => {
       return {
+        name: m.organization.name,
         organizationId: m.organizationId,
         role: m.role,
       };

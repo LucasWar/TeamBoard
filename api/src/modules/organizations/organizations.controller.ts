@@ -63,7 +63,8 @@ export class OrganizationsController {
   // }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.organizationsService.remove(+id);
+  @Roles('ADMIN')
+  remove(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.organizationsService.remove(id, userId);
   }
 }

@@ -14,6 +14,10 @@ export class OrganizationRepository {
     return this.prismaService.organization.findUnique(findDto);
   }
 
+  delete(deleteDto: Prisma.OrganizationDeleteArgs) {
+    return this.prismaService.organization.delete(deleteDto);
+  }
+
   findMany<T extends Prisma.OrganizationFindManyArgs>(
     findDto?: Prisma.SelectSubset<T, Prisma.OrganizationFindManyArgs>,
   ) {

@@ -4,7 +4,7 @@ import { TasksRepository } from 'src/shared/database/repositories/tasks.reposito
 import { ProjectsService } from '../projects/projects.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { MembershipsService } from '../memberships/memberships.service';
-import { EnumStatusTask } from '@prisma/client';
+import { EnumStatusTask, Prisma } from '@prisma/client';
 import { TransactionManager } from 'src/shared/database/transaction.manager';
 import { ReorderTaskDto } from './dto/reorder-task.dto';
 
@@ -99,6 +99,13 @@ export class TasksService {
     return await this.taskRepo.findMany({
       where: { projectId, organizationId, deletedAt: null },
       orderBy: { position: 'asc' }, // Essencial para o Kanban renderizar certo
+      omit: {
+        assigneeId: true,
+        completedAt: true,
+        createdAt: true,
+        deletedAt: true,
+        updatedAt: true,
+      },
       include: {
         assignee: { select: { id: true, name: true, avatar: true } },
       },
@@ -149,7 +156,7 @@ export class TasksService {
         organizationId: orgId,
         assigneeId: userId,
         completedAt: {
-          gte: lastSevenDays, // Maior ou igual a 7 dias atrás
+          gte: lastSevenDays,
           lte: today,
         },
       },
@@ -208,6 +215,20 @@ export class TasksService {
         },
       });
 
+      if (dto.oldStatus && dto.oldStatus != dto.newStatus) {
+        await this.taskRepo.updateMany({
+          where: {
+            projectId: task.projectId,
+            status: dto.oldStatus,
+            position: { gt: dto.newPosition },
+            id: { not: taskId },
+          },
+          data: {
+            position: { decrement: 1 },
+          },
+        });
+      }
+
       return tx.task.update({
         where: { id: taskId },
         data: {
@@ -226,9 +247,20 @@ export class TasksService {
   ) {
     const task = await this.verifyTaskOwnership(taskId, orgId);
 
+    const data: Prisma.TaskUncheckedUpdateInput = {
+      status: newStatus,
+      updatedAt: new Date(),
+    };
+
+    if (newStatus === 'DONE') {
+      data.completedAt = new Date();
+    } else {
+      data.completedAt = null;
+    }
+
     const updatedTask = await this.taskRepo.update({
       where: { id: taskId },
-      data: { status: newStatus }, // Ajuste tipagem do Enum
+      data,
     });
 
     void this.auditLogService.logAction({
