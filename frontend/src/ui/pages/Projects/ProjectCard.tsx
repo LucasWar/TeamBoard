@@ -1,29 +1,56 @@
 import { Progress } from "radix-ui";
-import type { enumStatusProject } from "../../../assets/enums/statusProject";
+import { enumStatusProject } from "../../../assets/enums/statusProject";
 import { statusMap } from "../../../app/utils/statusMap";
 import { cn } from "../../../lib/utils";
-import { Trash2, FolderClosed } from "lucide-react";
+import { Trash2, FolderClosed, ClipboardPen, FolderOpen } from "lucide-react";
+import type { EditProject } from "../../../assets/interfaces/projetcs";
+import type { ChangeStatusProjectParams } from "../../../services/projectsServices/archiveProject";
+import { Link } from "react-router-dom";
 
 interface ProjectCardProps{
   title: string,
+  id: string,
   describe: string,
   status: enumStatusProject,
   advance: number
+  onDelete: (id: string) => void
+  onEdit: (project: EditProject) => void
+  onArchiving: (id: string, params: ChangeStatusProjectParams) => void
 }
 
 
-export function ProjectCard({describe, status, title, advance}: ProjectCardProps){
+export function ProjectCard({describe, status, title, advance, onDelete, id, onEdit, onArchiving}: ProjectCardProps){
+
   const statusConfig = statusMap[status]
+
   return(
-    <div className="flex flex-col bg-white min-h-60 border shadow ">
+    <div className="flex flex-col bg-white min-h-60 border shadow min-w-120 sm:min-w-0">
       <header className="flex mt-6 ml-4 justify-between"> 
-        <div className="flex flex-col">
-          <p className="font-medium text-2xl">{title}</p>
+        <div className="flex flex-col w-3/4">
+          <Link to={`tasks/${id}`}><p className="font-medium text-2xl">{title}</p></Link>
           <p className="text-gray-400 text-xl">{describe}</p>
         </div>
-        <div className="flex gap-5 text-gray-400 mr-2">
-          <Trash2 className="w-6 h-6 hover:text-red-500 transition-colors" />
-          <FolderClosed className="w-6 h-6 hover:text-blue-500 transition-colors" />
+        <div className="flex gap-4 text-gray-400 shrink-0">
+          <button onClick={() => onDelete(id)}>
+            <Trash2 className="w-6 h-6 hover:text-red-500 transition-colors" />
+          </button>
+          { status == enumStatusProject.ARCHIVED &&
+            <button onClick={() => onArchiving(id, {status: 'ACTIVE'})}>
+              <FolderOpen className="w-6 h-6 hover:text-blue-500 transition-colors" />
+            </button>
+          }
+          { status == enumStatusProject.ACTIVE && 
+            <button onClick={() => onArchiving(id, {status: 'ARCHIVED'})}>
+              <FolderClosed className="w-6 h-6 hover:text-blue-500 transition-colors" />
+            </button>
+          }
+          <button onClick={
+              () => {
+                onEdit({description: describe, name: title, id: id})
+              }
+            }>
+            <ClipboardPen className="w-6 h-6 hover:text-yellow-500 transition-colors" />
+          </button>
         </div>
       </header>
       <div className="flex flex-col ml-4 mt-5 mr-4 items-start">

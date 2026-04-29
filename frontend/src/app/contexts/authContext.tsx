@@ -9,6 +9,7 @@ interface AuthContextValue {
   signin(accesseToken:string): void; 
   signout(): void;
   userName?: string
+  avatar?: string
 }
 
 export const AuthContext = createContext({} as AuthContextValue);
@@ -47,7 +48,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
   }, [isError, signout])
   
   return (
-    <AuthContext.Provider value={{ signedIn: isSuccess && signedIn, signin, signout, isFetchingAuth: isFetching, userName: me?.name }}>
+    <AuthContext.Provider value={{ signedIn: isSuccess && signedIn, signin, signout, isFetchingAuth: isFetching, userName: me?.name, avatar: me?.avatar }}>
       {children}
     </AuthContext.Provider>
   );

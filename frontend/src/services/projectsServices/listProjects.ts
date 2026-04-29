@@ -1,7 +1,7 @@
 import type { enumStatusProject } from "../../assets/enums/statusProject";
 import { api } from "../../lib/axios";
 
-interface listProjectsResponse {
+interface listProjectsData {
   id: string,
   name: string
   description: string
@@ -10,9 +10,23 @@ interface listProjectsResponse {
 
 }
 
+interface listProjectsPagination {
+  total: number,
+  perPage: string,
+  page: string,
+  hasNext: boolean,
+  hasPrev: boolean
+
+}
+
+interface listProjectsResponse {
+  data: listProjectsData[]
+  pagination: listProjectsPagination
+}
+
 export interface listProjectsFilter {
-  page?: number;
-  limit?: number;
+  page: number;
+  limit: number;
   sort?: 'asc' | 'desc';
   sortBy?: string;
   status?: enumStatusProject;
@@ -20,7 +34,7 @@ export interface listProjectsFilter {
 }
 
 export async function listProjects(filter: listProjectsFilter) {
-  return await api.get<listProjectsResponse[]>('projects',{
+  return await api.get<listProjectsResponse>('projects',{
     params: filter
   })
 }

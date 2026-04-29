@@ -50,10 +50,12 @@ export function DashboardLayout(){
               <BookOpenIcon className="w-5 h-5" />
               <span>Minhas tarefas</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Building className="w-5 h-5" />
-              <span>Minhas Organizações</span>
-            </div>
+            <Link to="/myOrganizations">
+              <div className="flex items-center gap-2">
+                <Building className="w-5 h-5" />
+                <span>Minhas Organizações</span>
+              </div>
+            </Link>
           </nav>
           <Separator.Root className="mt-2 bg-red-600 data-[orientation=horizontal]:h-px " />
         </div>

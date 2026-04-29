@@ -9,7 +9,7 @@ export function Dashboard() {
     <div className="flex-1 p-8 bg-gray-50 min-h-screen">
       
       <header className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Bom dia, {userName} 👋</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Olá, {userName} 👋</h1>
         <p className="text-gray-500 text-sm mt-1">Aqui está o resumo do seu dia na Minha Organização.</p>
       </header>
 

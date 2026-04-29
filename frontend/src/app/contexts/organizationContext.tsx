@@ -30,7 +30,7 @@ export const OrganizationProvider = ({children}: {children: React.ReactNode}) =>
 
   const { data, isFetching } = useQuery({
     queryKey: ['myOrganizations'],
-    queryFn: async () => usersService.getMyOrganizations(),
+    queryFn: async () => await usersService.getMyOrganizations(),
     enabled: signedIn,
   });
 

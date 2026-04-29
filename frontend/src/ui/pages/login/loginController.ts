@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { authService } from "../../../services/authServices";
 import { useAuth } from "../../../app/hooks/useAuth";
+import toast from "react-hot-toast";
 
 export function LoginController() {
   const schema = z.object({
@@ -29,8 +30,9 @@ export function LoginController() {
     try{
       const { accessToken } = await mutateAsync(data)
       signin(accessToken)
-    }catch(error) {
-      console.log(error)
+      toast.success("Login realizado com sucesso");
+    } catch (error) {
+      toast.error( error.response.data.message );
     }
   })
 

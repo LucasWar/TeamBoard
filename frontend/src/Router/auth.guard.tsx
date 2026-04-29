@@ -9,7 +9,7 @@ interface AuthGuardProps {
 
 export function AuthGuard({ isPrivate }:AuthGuardProps) {
   const { signedIn, isFetchingAuth } = useAuth()
-  const { selectedOrganization, isOrgLoading } = useOrganization()
+  const { selectedOrganization, isOrgLoading} = useOrganization()
 
   if (isFetchingAuth || isOrgLoading) {
     return <PageLoader />; 

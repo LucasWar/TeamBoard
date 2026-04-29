@@ -3,9 +3,12 @@ import { Input } from "../../../assets/components/Input";
 import { Button } from "../../../assets/components/Button";
 import { useRegisterController } from "./useRegisterController";
 
+import { Controller } from "react-hook-form";
+import { ImageInput } from "./imageInput";
+
 
 export function Register() {
-  const { handleSubmit, register } = useRegisterController()
+  const { handleSubmit, register, control } = useRegisterController()
 
   return (
     <div className="w-1/2">
@@ -24,6 +27,18 @@ export function Register() {
         </p>
       </header>
       <form className="mt-16 flex flex-col gap-4" onSubmit={handleSubmit}>
+        <div className="flex items-center justify-center">
+          <Controller
+            name="avatar"
+            control={control}
+            render={({ field }) => (
+              <ImageInput
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+        </div>
         <Input type="text" placeholder="Nome" {...register('name')} />
         <Input type="email" placeholder="E-email" {...register('email')} />
         <Input type="password" placeholder="Senha"  {...register('password')} />

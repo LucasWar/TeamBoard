@@ -10,9 +10,14 @@ function DropdownMenuRoot({children}: {children: React.ReactNode}) {
   );
 }
 
-function DropdownMenuTrigger({children}: {children: React.ReactNode}) {
+interface DropdownMenuTriggerProps {
+  children: React.ReactNode,
+  className?: string
+}
+
+function DropdownMenuTrigger({children, className}: DropdownMenuTriggerProps) {
   return(
-    <RdxDropdownMenu.Trigger className="outline-none">
+    <RdxDropdownMenu.Trigger className={cn("outline-none", className)}>
       {children}
     </RdxDropdownMenu.Trigger>
   );

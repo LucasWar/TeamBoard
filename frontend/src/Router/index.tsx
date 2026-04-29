@@ -7,6 +7,8 @@ import { Onboarding } from "../ui/pages/onboarding";
 import { DashboardLayout } from "../ui/layouts/dashboard_laytou";
 import { Dashboard } from "../ui/pages/dashboard";
 import { ProjectsDashboard } from "../ui/pages/Projects";
+import { MyOrganizations } from "../ui/pages/organizations";
+import { KanbanBoard } from "../ui/pages/kaban";
 
 
 export function Router() {
@@ -25,9 +27,11 @@ export function Router() {
           </Route>
         </Route>
         <Route element={<AuthGuard isPrivate={true} />}>
-          <Route element={<DashboardLayout title="Dashboard" />} >
+          <Route element={<DashboardLayout />} >
             <Route path='/' element={<Dashboard />}/>
             <Route path='/projects' element={<ProjectsDashboard />}/>
+            <Route path='/myOrganizations' element={<MyOrganizations />}/> 
+            <Route path='projects/tasks/:idProject' element={<KanbanBoard />}/> 
           </Route>
         </Route>
       </Routes>

@@ -3,6 +3,7 @@ import { api } from "../../lib/axios"
 interface MeResonse {
   name: string
   email: string 
+  avatar?: string
 }
 
 export async function me() {

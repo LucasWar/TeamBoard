@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import z from "zod";
 import { OrganizationService } from "../../../services/organizationsServices";
 import { enumPlan } from "../../../assets/enums/plan";
@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useOrganization } from "../../../app/hooks/useOrganization";
 
 export function useControllerOnboarding() {
+  const queryClient = useQueryClient();
   const schema = z.object({
       name: z.string().nonempty('Nome não pode esta vazio'),
       plan: z.enum(enumPlan, 'Escolha um dos planos disponiveis'),
@@ -22,7 +23,10 @@ export function useControllerOnboarding() {
 
   const { mutateAsync } = useMutation({
     mutationFn: async (data: formData) => { 
-      return OrganizationService.create(data) 
+      return await OrganizationService.create(data) 
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myOrganizations'] });
     }
   })
 
