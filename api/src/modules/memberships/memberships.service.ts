@@ -131,6 +131,19 @@ export class MembershipsService {
     }
   }
 
+  async verifyUserInOrgByEmail(email: string, organizationId: string) {
+    const membership = await this.membershipRepo.findFirst({
+      where: {
+        AND: [{ user: { email } }, { organizationId }],
+      },
+      select: {
+        userId: true,
+      },
+    });
+
+    return membership ? membership.userId : undefined;
+  }
+
   async findAll() {
     return await this.membershipRepo.findMany();
   }

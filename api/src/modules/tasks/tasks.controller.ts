@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -17,6 +18,7 @@ import { ChangeTaskStatusDto } from './dto/change-task.dto';
 import { ReorderTaskDto } from './dto/reorder-task.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OrganizationGuard } from 'src/shared/guards/organization.guard';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Controller('tasks')
 @UseGuards(JwtAuthGuard, OrganizationGuard)
@@ -26,6 +28,11 @@ export class TasksController {
   @Get('myKips')
   myKips(@CurrentOrg() orgId: string, @CurrentUser('userId') userId: string) {
     return this.tasksService.myKpis(userId, orgId);
+  }
+
+  @Get('myTasks')
+  myTasks(@CurrentOrg() orgId: string, @CurrentUser('userId') userId: string) {
+    return this.tasksService.myTasks(userId, orgId);
   }
 
   @Get('recentTasksByPriority')
@@ -70,6 +77,16 @@ export class TasksController {
     @CurrentUser('userId') userId: string,
   ) {
     return this.tasksService.changeStatus(taskId, dto.status, orgId, userId);
+  }
+
+  @Patch(':id')
+  updateTaks(
+    @Param('id') taskId: string,
+    @Body() dto: UpdateTaskDto,
+    @CurrentOrg() orgId: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.tasksService.updateTask(taskId, dto, orgId, userId);
   }
 
   @Patch(':id/assign/:assigneeId')

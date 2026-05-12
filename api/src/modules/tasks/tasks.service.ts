@@ -7,6 +7,7 @@ import { MembershipsService } from '../memberships/memberships.service';
 import { EnumStatusTask, Prisma } from '@prisma/client';
 import { TransactionManager } from 'src/shared/database/transaction.manager';
 import { ReorderTaskDto } from './dto/reorder-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class TasksService {
@@ -24,6 +25,8 @@ export class TasksService {
     reporterId: string,
     projectId: string,
   ) {
+    const { assigneeEmail, ...dto } = createTaskDto;
+
     const project = await this.projectService.projectBelongsToOrganization(
       projectId,
       organizationId,
@@ -33,9 +36,11 @@ export class TasksService {
       throw new NotFoundException('O projeto não pertence a esta organização');
     }
 
-    if (createTaskDto.assigneeId) {
-      await this.membershipService.verifyUserInOrg(
-        createTaskDto.assigneeId,
+    let assigneeId: string | undefined;
+
+    if (assigneeEmail) {
+      assigneeId = await this.membershipService.verifyUserInOrgByEmail(
+        assigneeEmail,
         organizationId,
       );
     }
@@ -48,7 +53,8 @@ export class TasksService {
 
     const newTask = await this.taskRepo.create({
       data: {
-        ...createTaskDto,
+        ...dto,
+        assigneeId,
         organizationId,
         reporterId,
         projectId,
@@ -68,6 +74,52 @@ export class TasksService {
     return newTask;
   }
 
+  async updateTask(
+    taskId: string,
+    dto: UpdateTaskDto,
+    orgId: string,
+    userId: string,
+  ) {
+    const { assigneeEmail, ...rest } = dto;
+
+    let assigned: string | undefined;
+
+    const task = await this.verifyTaskOwnership(taskId, orgId);
+
+    if (!task) {
+      throw new NotFoundException('A tarefa não pertence a sua organização');
+    }
+
+    if (assigneeEmail) {
+      assigned = await this.membershipService.verifyUserInOrgByEmail(
+        assigneeEmail,
+        orgId,
+      );
+
+      if (!assigned) {
+        throw new NotFoundException('Usuário atribuido a tarefa não existe');
+      }
+    }
+
+    const user = await this.membershipService.getMembershipByUserAndOrg(
+      userId,
+      orgId,
+    );
+
+    if (!user) {
+      throw new NotFoundException('Você não pertence a essa organização');
+    }
+
+    await this.taskRepo.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        ...rest,
+      },
+    });
+  }
+
   async assignTask(
     taskId: string,
     assigneeId: string,
@@ -76,7 +128,7 @@ export class TasksService {
   ) {
     const task = await this.verifyTaskOwnership(taskId, orgId);
 
-    await this.membershipService.verifyUserInOrg(assigneeId, orgId); // Garante que não é de fora
+    await this.membershipService.verifyUserInOrg(assigneeId, orgId);
 
     const updatedTask = await this.taskRepo.update({
       where: { id: taskId },
@@ -107,7 +159,9 @@ export class TasksService {
         updatedAt: true,
       },
       include: {
-        assignee: { select: { id: true, name: true, avatar: true } },
+        assignee: {
+          select: { id: true, name: true, avatar: true, email: true },
+        },
       },
     });
   }
@@ -125,6 +179,70 @@ export class TasksService {
     });
 
     return result;
+  }
+
+  async myTasks(userId: string, orgId: string) {
+    const today = new Date();
+
+    // remove horas/minutos/segundos
+    today.setHours(0, 0, 0, 0);
+
+    const result = await this.taskRepo.findMany({
+      where: {
+        OR: [{ status: 'IN_PROGRESS' }, { status: 'TODO' }],
+        organizationId: orgId,
+        assigneeId: userId,
+
+        project: {
+          status: 'ACTIVE',
+        },
+      },
+
+      omit: {
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+        organizationId: true,
+        projectId: true,
+        position: true,
+      },
+    });
+
+    const grouped = {
+      late: [] as typeof result,
+      today: [] as typeof result,
+      upcoming: [] as typeof result,
+    };
+
+    for (const task of result) {
+      // tarefas sem data
+      if (!task.dueDate) {
+        grouped.upcoming.push(task);
+        continue;
+      }
+
+      const dueDate = new Date(task.dueDate);
+
+      // normaliza data
+      dueDate.setHours(0, 0, 0, 0);
+
+      // atrasadas
+      if (dueDate < today) {
+        grouped.late.push(task);
+        continue;
+      }
+
+      // hoje
+      if (dueDate.getTime() === today.getTime()) {
+        grouped.today.push(task);
+        continue;
+      }
+
+      // futuras
+      grouped.upcoming.push(task);
+    }
+
+    return grouped;
   }
 
   async myKpis(userId: string, orgId: string) {
@@ -229,12 +347,23 @@ export class TasksService {
         });
       }
 
-      return tx.task.update({
+      const data: Prisma.TaskUncheckedUpdateInput = {
+        status: dto.newStatus,
+        position: dto.newPosition,
+      };
+
+      if (
+        dto.newStatus === EnumStatusTask.DONE &&
+        dto.newStatus != dto.oldStatus
+      ) {
+        data.completedAt = new Date();
+      } else {
+        data.completedAt = null;
+      }
+
+      return this.taskRepo.update({
         where: { id: taskId },
-        data: {
-          status: dto.newStatus,
-          position: dto.newPosition,
-        },
+        data,
       });
     });
   }

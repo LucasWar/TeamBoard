@@ -1,5 +1,7 @@
-import { EnumPriority, EnumStatusTask } from '@prisma/client';
+import { EnumPriority } from '@prisma/client';
 import {
+  IsDateString,
+  IsEmail,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -10,21 +12,21 @@ import {
 export class CreateTaskDto {
   @IsNotEmpty()
   @IsString()
-  title: string;
+  title!: string;
 
   @IsString()
   @IsOptional()
-  description: string;
-
-  @IsEnum(EnumStatusTask)
-  @IsNotEmpty()
-  status: EnumStatusTask;
+  description!: string;
 
   @IsEnum(EnumPriority)
   @IsNotEmpty()
-  priority: EnumPriority;
+  priority!: EnumPriority;
 
-  @IsUUID()
+  @IsDateString()
   @IsOptional()
-  assigneeId?: string;
+  dueDate?: string;
+
+  @IsEmail()
+  @IsOptional()
+  assigneeEmail?: string;
 }
