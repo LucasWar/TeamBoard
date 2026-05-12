@@ -1,22 +1,25 @@
-import type { Task } from "../../../assets/interfaces/task";
+import type { EditTask, Task } from "../../../assets/interfaces/task";
 import { KanbanCard } from "./kabanCard";
-import {useDroppable} from '@dnd-kit/react';
-
+import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 interface KanbanColumnProps {
   id: string
   position?: number
   title: string
   tasks: Task[]
+  handleEdit: (task: EditTask) => void
 }
 
-export function KanbanColumn({id, tasks, title}: KanbanColumnProps){
-  const {ref} = useDroppable({
+export function KanbanColumn({id, tasks, title, handleEdit}: KanbanColumnProps){
+  const { setNodeRef } = useDroppable({
     id,
+    data: {
+      type: 'Column',
+    }
   });
 
-
   return (
-    <div ref={ref} key={id} className="w-80 flex-shrink-0 bg-gray-100/50 rounded-lg p-4">
+    <div ref={setNodeRef} className="w-80 flex-shrink-0 bg-gray-100/50 rounded-lg p-4">
       
       {/* Título da Coluna */}
       <div className="flex justify-between items-center mb-4" >
@@ -27,15 +30,18 @@ export function KanbanColumn({id, tasks, title}: KanbanColumnProps){
       </div>
 
       {/* Lista de Cards */}
-      <div className="space-y-3">
-        {tasks.map((task) => (
-          <KanbanCard 
-            key={task.id}
-            task={task}
-          />
-          
-        ))}
-      </div>
+      <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+        <div className="flex flex-col gap-3 min-h-37.5">
+          {tasks.map((task) => (
+            <KanbanCard
+              key={task.id}
+              task={task}
+              onEdit={handleEdit}
+            />
+            
+          ))}
+        </div>
+      </SortableContext>
     </div>
   );
 }

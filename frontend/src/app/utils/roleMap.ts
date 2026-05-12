@@ -1,4 +1,4 @@
-import type { EnumRoles } from "../../assets/enums/roles";
+import type { EnumRoles } from "../enums/roles";
 import type { GerMyOrganizationsResponse } from "../../services/userServices/myOrganizations";
 
 export function createRoleMap(data: GerMyOrganizationsResponse[]): Map<string, EnumRoles> {

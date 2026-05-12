@@ -1,4 +1,4 @@
-import type { enumStatusProject } from "../../assets/enums/statusProject";
+import type { enumStatusProject } from "../../app/enums/statusProject";
 import { api } from "../../lib/axios";
 
 interface listProjectsData {

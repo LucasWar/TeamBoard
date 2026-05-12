@@ -9,6 +9,7 @@ import { Dashboard } from "../ui/pages/dashboard";
 import { ProjectsDashboard } from "../ui/pages/Projects";
 import { MyOrganizations } from "../ui/pages/organizations";
 import { KanbanBoard } from "../ui/pages/kaban";
+import { MyTasks } from "../ui/pages/myTasks";
 
 
 export function Router() {
@@ -32,6 +33,7 @@ export function Router() {
             <Route path='/projects' element={<ProjectsDashboard />}/>
             <Route path='/myOrganizations' element={<MyOrganizations />}/> 
             <Route path='projects/tasks/:idProject' element={<KanbanBoard />}/> 
+            <Route path='myTasks' element={<MyTasks />}/> 
           </Route>
         </Route>
       </Routes>

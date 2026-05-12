@@ -3,7 +3,7 @@ import { localStorageKeys } from "../config/localStorageKeys";
 import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { usersService } from "../../services/userServices";
-import { EnumRoles } from "../../assets/enums/roles";
+import { EnumRoles } from "../enums/roles";
 import type { GerMyOrganizationsResponse } from "../../services/userServices/myOrganizations";
 
 interface OrganizationContextValue {

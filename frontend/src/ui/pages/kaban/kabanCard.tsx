@@ -1,51 +1,86 @@
 import { Avatar } from "radix-ui";
-import { EnumStatusTask } from "../../../assets/enums/statusTask";
-import { PriorityTask } from "../../../assets/enums/priorityTask";import { formatDateBR } from "../../../assets/utils/formarDate";
-import { useSortable,  } from '@dnd-kit/react/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { priorityMap } from "../../../app/utils/priorityMap";
+import { cn } from "../../../lib/utils";
+import type { EditTask, Task } from "../../../assets/interfaces/task";
+import { formatDateBR } from "../../../app/utils/formarDate";
+import { useMemo } from "react";
+import { X } from "lucide-react";
 
 interface KanbanCardProps {
-  task: {
-    id: string,
-    organizationId: string,
-    projectId: string,
-    title: string,
-    description: string,
-    status: EnumStatusTask,
-    priority: PriorityTask,
-    reporterId: string,
-    dueDate: string,
-    position: number,
-    assignee?: {
-      id: string,
-      name: string,
-      avatar?: string
-    }
-  }
+  task: Task
+  isOverlay?: boolean;
+  onEdit: (task: EditTask) => void
 }
 
-export function KanbanCard({ task }: KanbanCardProps) {
-  const { ref, isDragging  } = useSortable({
+export function KanbanCard({ task, isOverlay, onEdit }: KanbanCardProps) {
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: task.id,
-    index: task.position
+    data: {
+      type: 'Task',
+      task,
+    }
   });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
+
+  const taskDataEdit = useMemo(() => ({
+    description: task.description,
+    dueDate: task.dueDate,
+    priority: task.priority,
+    title: task.title,
+    id: task.id,
+    assigneeEmail: task.assignee?.email
+  }), [task]);
+
+  if (isDragging && !isOverlay) {
+    return (
+      <div 
+        ref={setNodeRef} 
+        style={style} 
+        className="bg-gray-100 border-2 border-dashed border-gray-300 p-4 rounded h-[120px] opacity-50"
+      />
+    );
+  }
 
   return(
     <div 
-      ref={ref}
+      onClick={() => onEdit(taskDataEdit)}
+      ref={setNodeRef} 
+      style={style}    
+      {...attributes}  
+      {...listeners}   
       className={`bg-white p-4 rounded border shadow-sm ${isDragging ? 'opacity-50 cursor-grabbing' : 'cursor-grab'}`}
     >
-      <h4 className="text-sm font-medium text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
-        {task.title}
-      </h4>
-      
+      <div className="flex justify-between items-center">
+        <h4 className="text-sm font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
+          {task.title}
+        </h4>
+        <div className="cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+
+            console.log('Excluir')
+          }}
+        > 
+          <X className="w-4 h-4"/>
+        </div>
+      </div>
       <div className="flex items-center justify-between mt-4">
         <div className="flex flex-col gap-2">
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded w-max uppercase}`}>
-            {task.priority === PriorityTask.HIGH ? 'Alta' : task.priority === PriorityTask.MEDIUM ? 'Média' : 'Baixa'}
+          <span className={cn(`text-[10px] font-bold px-2 py-0.5 rounded w-max uppercase}`,priorityMap[task.priority].classNameStatus)}>
+            {priorityMap[task.priority].label}
           </span>
-          <span className={`text-gray-500'}`}>
-            Prazo: {formatDateBR(task.dueDate)}
-          </span>
+          {task.dueDate &&
+            <span className={`text-gray-500'}`}>
+              Prazo: {formatDateBR(task.dueDate)}
+            </span>
+          }
         </div>
         {
           task.assignee && (

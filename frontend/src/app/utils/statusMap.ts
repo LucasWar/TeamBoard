@@ -1,4 +1,4 @@
-import type { enumStatusProject } from "../../assets/enums/statusProject";
+import type { enumStatusProject } from "../enums/statusProject";
 
 export const statusMap: Record<enumStatusProject, { label: string; classNameStatus: string, classNameBar: string }> = {
   ACTIVE: { label: "Ativo", classNameStatus: "bg-green-500", classNameBar: "bg-green-700"},

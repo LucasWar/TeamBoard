@@ -1,4 +1,4 @@
-import type { PriorityTask } from "../../assets/enums/priorityTask";
+import type { PriorityTask } from "../../app/enums/priorityTask";
 import { api } from "../../lib/axios";
 
 interface recentTasksByPriorityResponse {

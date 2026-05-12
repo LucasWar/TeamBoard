@@ -9,3 +9,12 @@ export function useRecentTasksByPriority() {
     }
   })
 }
+
+export function useListMyTasks() {
+  return useQuery({
+    queryKey: ['myTasks'],
+    queryFn: async () => {
+      return await tasksService.listMyTasks()
+    }
+  })
+}

@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { enumPlan } from "../../../../assets/enums/plan"
+import { enumPlan } from "../../../../app/enums/plan"
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

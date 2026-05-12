@@ -1,5 +1,5 @@
+import { Link } from "react-router-dom"
 import { useRecentTasksByPriority } from "../../../app/hooks/useTask"
-import { getTimeDifference } from "../../../app/utils/getTimeDifference"
 import { priorityMap } from "../../../app/utils/priorityMap"
 import { cn } from "../../../lib/utils"
 
@@ -12,7 +12,7 @@ export function NextTask() {
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
         <div className="p-5 border-b border-gray-100 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-800">Meu Foco (Próximas Tarefas)</h2>
-          <button className="text-sm text-blue-600 hover:underline">Ver todas</button>
+          <button className="text-sm text-blue-600 hover:underline"><Link to="/myTasks">Ver todas</Link></button>
         </div>
         
         <div className="p-5">

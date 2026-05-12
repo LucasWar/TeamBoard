@@ -3,8 +3,8 @@ import { cn } from "../lib/utils";
 import { ChevronDownIcon, CheckIcon } from "@radix-ui/react-icons";
 
 // ROOT
-function SelectRoot({ children, ...props }: any) {
-  return <RdxSelect.Root {...props}>{children}</RdxSelect.Root>;
+function SelectRoot({ children, defaultValue, onValueChange, ...props }: any) {
+  return <RdxSelect.Root onValueChange={onValueChange} defaultValue={defaultValue} {...props}>{children}</RdxSelect.Root>;
 }
 
 // TRIGGER

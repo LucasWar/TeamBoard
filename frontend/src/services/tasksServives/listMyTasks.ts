@@ -2,7 +2,7 @@ import type { EnumStatusTask } from "../../app/enums/statusTask";
 import type { PriorityTask } from "../../app/enums/priorityTask";
 import { api } from "../../lib/axios";
 
-interface ListTasksByProjectIdResponse {
+interface MyTasks {
   id: string,
   organizationId: string,
   projectId: string,
@@ -13,16 +13,16 @@ interface ListTasksByProjectIdResponse {
   reporterId: string,
   dueDate?: string,
   position: number,
-  assignee?: {
-    id: string,
-    name: string,
-    avatar?: string
-    email: string
-  }
 }
 
-export async function listTasksByProjectId(id: string) {
-  const { data } = await api.get<ListTasksByProjectIdResponse[]>(`tasks/project/${id}`);
+export interface ListMyTasks {
+  late: MyTasks[],
+  today: MyTasks[],
+  upcoming: MyTasks[],
+}
+
+export async function listMyTasks() {
+  const { data } = await api.get<ListMyTasks>(`tasks/myTasks`);
 
   return data;
 }

@@ -1,4 +1,4 @@
-import type { PriorityTask } from "../../assets/enums/priorityTask";
+import type { PriorityTask } from "../enums/priorityTask";
 
 export const priorityMap: Record<PriorityTask, { label: string; classNameStatus: string, classNameBar: string }> = {
   LOW: { label: "Baixa", classNameStatus: "text-green-600 bg-green-50", classNameBar: "bg-green-700"},

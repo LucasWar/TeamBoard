@@ -1,8 +1,8 @@
 import { Plus, SearchIcon } from "lucide-react";
 import { ProjectCard } from "./ProjectCard";
 import { Select } from "../../../components/Select";
-import { EnumRoles } from "../../../assets/enums/roles";
-import type { enumStatusProject } from "../../../assets/enums/statusProject";
+import { EnumRoles } from "../../../app/enums/roles";
+import type { enumStatusProject } from "../../../app/enums/statusProject";
 import { ProjectModal } from "./ModalProject";
 import { useControllerProject } from "./useProjectController";
 import { DeleteProjectModal } from "./ModalDeleteProject";

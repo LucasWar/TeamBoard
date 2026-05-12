@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import z from "zod";
 import { OrganizationService } from "../../../services/organizationsServices";
-import { enumPlan } from "../../../assets/enums/plan";
+import { enumPlan } from "../../../app/enums/plan";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useOrganization } from "../../../app/hooks/useOrganization";

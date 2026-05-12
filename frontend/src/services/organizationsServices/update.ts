@@ -1,4 +1,4 @@
-import type { enumPlan } from "../../assets/enums/plan";
+import type { enumPlan } from "../../app/enums/plan";
 import { api } from "../../lib/axios";
 
 interface UpdateParams {

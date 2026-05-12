@@ -1,4 +1,4 @@
-import type { enumStatusProject } from "../../../assets/enums/statusProject"
+import type { enumStatusProject } from "../../../app/enums/statusProject"
 import type { EditProject } from "../../../assets/interfaces/projetcs"
 import type { ChangeStatusProjectParams } from "../../../services/projectsServices/archiveProject"
 

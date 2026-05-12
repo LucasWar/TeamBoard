@@ -16,5 +16,15 @@ export interface Task {
     id: string,
     name: string,
     avatar?: string
+    email: string
   }
+}
+
+export interface EditTask {
+  id: string,
+  title?: string,
+  description?: string,
+  priority?: PriorityTask,
+  dueDate?: Date,
+  assigneeEmail?: string
 }

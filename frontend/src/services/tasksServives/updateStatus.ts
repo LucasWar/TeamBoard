@@ -1,11 +1,13 @@
-import type { EnumStatusTask } from "../../assets/enums/statusTask";
+import type { EnumStatusTask } from "../../app/enums/statusTask";
 import { api } from "../../lib/axios";
 
-interface UpdateStatusProps{
-  status: EnumStatusTask
+export interface UpdateStatusProps {
+  newStatus: EnumStatusTask
+  oldStatus: EnumStatusTask
+  newPosition: number
+  id: string
 }
 
-export async function updateStatus(params: UpdateStatusProps){
-  const { data } = await api.patch('/tasks/myKips', params);
-  return data;
+export async function updateStatus({id, ...params}: UpdateStatusProps){
+  await api.patch(`/tasks/${id}/reorder`, params);
 }

@@ -1,5 +1,5 @@
 import { Progress } from "radix-ui";
-import { enumStatusProject } from "../../../assets/enums/statusProject";
+import { enumStatusProject } from "../../../app/enums/statusProject";
 import { statusMap } from "../../../app/utils/statusMap";
 import { cn } from "../../../lib/utils";
 import { Trash2, FolderClosed, ClipboardPen, FolderOpen } from "lucide-react";
@@ -27,8 +27,8 @@ export function ProjectCard({describe, status, title, advance, onDelete, id, onE
     <div className="flex flex-col bg-white min-h-60 border shadow min-w-120 sm:min-w-0">
       <header className="flex mt-6 ml-4 justify-between"> 
         <div className="flex flex-col w-3/4">
-          <Link to={`tasks/${id}`}><p className="font-medium text-2xl">{title}</p></Link>
-          <p className="text-gray-400 text-xl">{describe}</p>
+          <p className="font-medium text-2xl hover:text-gray-600 transition-all"><Link to={`tasks/${id}`}  state={{ title, describe }}>{title}</Link></p>
+          <p className="text-gray-400 text-xl line-clamp-2 flex-1 min-w-0 wrap-break-words">{describe}</p>
         </div>
         <div className="flex gap-4 text-gray-400 shrink-0">
           <button onClick={() => onDelete(id)}>

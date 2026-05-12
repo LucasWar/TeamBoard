@@ -1,4 +1,4 @@
-import type { EnumRoles } from "../../assets/enums/roles";
+import type { EnumRoles } from "../../app/enums/roles";
 import { api } from "../../lib/axios";
 
 export interface GerMyOrganizationsResponse {

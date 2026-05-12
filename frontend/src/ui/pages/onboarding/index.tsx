@@ -4,7 +4,7 @@ import { Input } from "../../../assets/components/Input";
 import { ArrowLeftFromLine } from "lucide-react";
 import { useControllerOnboarding } from "./useContrllerOnboarding";
 import { Select } from "../../../components/Select";
-import { enumPlan } from "../../../assets/enums/plan";
+import { enumPlan } from "../../../app/enums/plan";
 import { Controller } from "react-hook-form";
 export function Onboarding() {
 

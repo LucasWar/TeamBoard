@@ -1,18 +1,14 @@
 import { Link, Outlet } from "react-router-dom";
 import { UserMenu } from "../../components/UserMenu";
-import { BookOpenIcon, Building, FolderKanbanIcon, SearchIcon } from "lucide-react";
+import { BookOpenIcon, Building, FolderKanbanIcon, UserIcon } from "lucide-react";
 import { Separator } from "radix-ui";
 import { DashboardIcon } from "@radix-ui/react-icons";
-
-interface DashboardLayoutProps {
-  title: string
-}
 
 export function DashboardLayout(){ 
 
   return (
     <div className="h-full">
-      <header className="bg-red h-13 text-2xl flex items-center justify-center relative bg-white">
+      {/* <header className="bg-red h-13 text-2xl flex items-center justify-center relative bg-white">
         <div className="absolute right-5 flex items-center justify-center">
           <div className="relative">
             <SearchIcon className="w-4 h-4 absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -24,10 +20,10 @@ export function DashboardLayout(){
           </div>
 
         </div>
-        {/* <input className="border  w-53 h-6 absolute right-0">
+        <input className="border  w-53 h-6 absolute right-0">
           <SearchIcon />
-        </input> */}
-      </header>
+        </input>
+      </header> */}
       <div className="h-full flex">
         <div className="bg-primary-bg w-60 h-full">
           <div className="mt-4 ml-2">
@@ -46,9 +42,15 @@ export function DashboardLayout(){
                   <span>Projetos</span>
               </div>
             </Link>
+            <Link to="/myTasks">
+              <div className="flex items-center gap-2">
+                <BookOpenIcon className="w-5 h-5" />
+                <span>Minhas tarefas</span>
+              </div>
+            </Link>
             <div className="flex items-center gap-2">
-              <BookOpenIcon className="w-5 h-5" />
-              <span>Minhas tarefas</span>
+              <UserIcon className="w-5 h-5" />
+              <span>Membros</span>
             </div>
             <Link to="/myOrganizations">
               <div className="flex items-center gap-2">
@@ -57,7 +59,7 @@ export function DashboardLayout(){
               </div>
             </Link>
           </nav>
-          <Separator.Root className="mt-2 bg-red-600 data-[orientation=horizontal]:h-px " />
+          {/* <Separator.Root className="mt-2 bg-red-600 data-[orientation=horizontal]:h-px " /> */}
         </div>
         <Outlet />  
       </div>

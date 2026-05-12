@@ -1,8 +1,8 @@
 import { useState } from "react";
-import type { EditOrganization } from "../../../assets/interfaces/organization";
 import { OrganizationService } from "../../../services/organizationsServices";
 import toast from "react-hot-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { EditOrganization } from "../../../app/interfaces/organization";
 
 export function useOrganizationController(){
   const queryClient = useQueryClient();

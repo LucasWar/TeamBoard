@@ -1,5 +1,5 @@
 import { Controller } from "react-hook-form";
-import { enumPlan } from "../../../../assets/enums/plan";
+import { enumPlan } from "../../../../app/enums/plan";
 import { Modal } from "../../../../components/Modal";
 import { Select } from "../../../../components/Select";
 import { Input } from "../../../../assets/components/Input";

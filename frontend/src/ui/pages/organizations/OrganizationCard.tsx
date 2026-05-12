@@ -1,9 +1,9 @@
 import { CircleCheck, ClipboardPen, Ellipsis, Trash, UserRoundPlus } from "lucide-react";
-import { EnumRoles } from "../../../assets/enums/roles";
+import { EnumRoles } from "../../../app/enums/roles";
 import { DropdownMenu } from "../../../components/DropdownMenu";
 import { cn } from "../../../lib/utils";
 import type { EditOrganization } from "../../../assets/interfaces/organization";
-import { enumPlan } from "../../../assets/enums/plan";
+import { enumPlan } from "../../../app/enums/plan";
 
 export interface OrganizationCardProps {
   organizationId: string
