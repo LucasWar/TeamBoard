@@ -74,6 +74,25 @@ export class TasksService {
     return newTask;
   }
 
+  async delete(id: string, orgId: string) {
+    const task = await this.taskRepo.findUnique({
+      where: {
+        id,
+        organizationId: orgId,
+      },
+    });
+
+    if (!task) {
+      throw new NotFoundException('Tarefa não econtrada');
+    }
+
+    await this.taskRepo.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
   async updateTask(
     taskId: string,
     dto: UpdateTaskDto,

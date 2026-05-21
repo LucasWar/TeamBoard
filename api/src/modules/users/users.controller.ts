@@ -1,8 +1,9 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AuthUser } from 'src/shared/interfaces/auth-user.interface';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -29,10 +30,10 @@ export class UsersController {
   //   return this.usersService.findOneByEmail(id);
   // }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.usersService.update(+id, updateUserDto);
-  // }
+  @Patch()
+  update(@CurrentUser() user: AuthUser, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(updateUserDto, user.userId);
+  }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {

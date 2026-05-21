@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
@@ -17,6 +18,8 @@ import { OrganizationGuard } from 'src/shared/guards/organization.guard';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { Roles } from 'src/shared/decorators/role.decorator';
 import { CurrentOrg } from 'src/shared/decorators/current-organization.decorator';
+import { AddMemberDTO } from './dto/add-member';
+import { FilterOrganizationDto } from './dto/filter-organization.dto';
 
 @Controller('organizations')
 @UseGuards(JwtAuthGuard)
@@ -31,20 +34,38 @@ export class OrganizationsController {
     return this.organizationsService.create(createOrganizationDto, user);
   }
 
-  @Get()
-  @Roles('USER')
-  @UseGuards(OrganizationGuard, RolesGuard)
-  findAll() {
-    return this.organizationsService.findAll();
-  }
+  // @Get()
+  // @Roles('USER')
+  // @UseGuards(OrganizationGuard, RolesGuard)
+  // findAll() {
+  //   return this.organizationsService.findAll();
+  // }
 
   @Get('summary')
-  @UseGuards(OrganizationGuard, RolesGuard)
+  @UseGuards(OrganizationGuard)
   sumarryDashboard(
     @CurrentOrg() orgId: string,
     @CurrentUser('userId') userId: string,
   ) {
     return this.organizationsService.sumarryDashboard(orgId, userId);
+  }
+
+  @Get('organizationUserId')
+  orgazanitionsUser(
+    @Query() filters: FilterOrganizationDto,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.organizationsService.listOrganizationByUserId(userId, filters);
+  }
+
+  @Get('members')
+  @UseGuards(OrganizationGuard, RolesGuard)
+  @Roles('ADMIN', 'MANAGER')
+  listMembers(
+    @CurrentOrg() orgId: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.organizationsService.listMembers(orgId, userId);
   }
 
   // @Get(':id')
@@ -54,7 +75,7 @@ export class OrganizationsController {
 
   // @Patch(':id')
   // @Roles('ADMIN')
-  // @UseGuards(OrganizationGuard, RolesGuard)
+  // 
   // update(
   //   @Param('id') id: string,
   //   @Body() updateOrganizationDto: UpdateOrganizationDto,
@@ -63,8 +84,19 @@ export class OrganizationsController {
   // }
 
   @Delete(':id')
+  @UseGuards(OrganizationGuard, RolesGuard)
   @Roles('ADMIN')
   remove(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     return this.organizationsService.remove(id, userId);
+  }
+
+  @Post('addMember')
+  @UseGuards(OrganizationGuard, RolesGuard)
+  @Roles('ADMIN')
+  addMember(
+    @Body() addMembershipDto: AddMemberDTO,
+    @CurrentOrg() orgId: string,
+  ) {
+    return this.organizationsService.AddMember(addMembershipDto, orgId);
   }
 }

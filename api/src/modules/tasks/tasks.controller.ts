@@ -7,6 +7,7 @@ import {
   Patch,
   UseGuards,
   Delete,
+  HttpCode,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -67,6 +68,12 @@ export class TasksController {
       projectId,
       organizationId.currentOrgId,
     );
+  }
+
+  @Delete(':id')
+  @HttpCode(200)
+  deleteTask(@Param('id') id: string, @CurrentOrg() orgId: string) {
+    return this.tasksService.delete(id, orgId);
   }
 
   @Patch(':id/status')

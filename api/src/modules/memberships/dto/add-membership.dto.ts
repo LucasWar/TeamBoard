@@ -4,9 +4,9 @@ import { IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 export class AddMembershipDTO {
   @IsString()
   @IsUUID()
-  userId: string;
+  userId!: string;
 
   @IsEnum(EnumRole)
   @IsNotEmpty()
-  role: EnumRole;
+  role!: EnumRole;
 }

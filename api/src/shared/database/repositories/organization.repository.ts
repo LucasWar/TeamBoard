@@ -18,6 +18,10 @@ export class OrganizationRepository {
     return this.prismaService.organization.delete(deleteDto);
   }
 
+  count(countDto: Prisma.OrganizationCountArgs) {
+    return this.prismaService.organization.count(countDto);
+  }
+
   findMany<T extends Prisma.OrganizationFindManyArgs>(
     findDto?: Prisma.SelectSubset<T, Prisma.OrganizationFindManyArgs>,
   ) {

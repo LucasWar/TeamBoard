@@ -25,6 +25,46 @@ export class MembershipsService {
     return memberBelongs;
   }
 
+  async listMembership(userId: string, organizationId: string) {
+    const record = await this.getMembershipByUserAndOrg(userId, organizationId);
+
+    if (!record) {
+      throw new ConflictException('Usuário não pertence a essa organização');
+    }
+
+    const members = await this.membershipRepo.findMany({
+      where: {
+        organizationId,
+        userId: {
+          not: userId,
+        },
+      },
+      select: {
+        role: true,
+        status: true,
+        user: {
+          select: {
+            id: true,
+            avatar: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    return members.map((member) => {
+      return {
+        id: member.user.id,
+        name: member.user.name,
+        email: member.user.email,
+        avatar: member.user.avatar,
+        role: member.role,
+        status: member.status,
+      };
+    });
+  }
+
   async addMembership(
     addMembershipDTO: AddMembershipDTO,
     organizationId: string,

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 // import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { OrganizationRepository } from 'src/shared/database/repositories/organization.repository';
@@ -7,6 +7,10 @@ import { AuthUser } from 'src/shared/interfaces/auth-user.interface';
 import { EnumRole, EnumStatus } from '@prisma/client';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { MembershipsService } from '../memberships/memberships.service';
+import { UsersService } from '../users/users.service';
+import { AddMemberDTO } from './dto/add-member';
+import { FilterOrganizationDto } from './dto/filter-organization.dto';
+import { OrganizationQueryBuilder } from './builder/organizations-query-builder';
 
 @Injectable()
 export class OrganizationsService {
@@ -14,6 +18,7 @@ export class OrganizationsService {
     private readonly organizationRepo: OrganizationRepository,
     private readonly membershipsServ: MembershipsService,
     private readonly auditLogService: AuditLogService,
+    private readonly userService: UsersService,
   ) {}
 
   async create(
@@ -48,8 +53,87 @@ export class OrganizationsService {
     return organization;
   }
 
-  async findAll() {
-    return this.organizationRepo.findMany();
+  async listMembers(orgId: string, userId: string) {
+    return await this.membershipsServ.listMembership(userId, orgId);
+  }
+
+  async listOrganizationByUserId(
+    userId: string,
+    filter: FilterOrganizationDto,
+  ) {
+    const { where: whereFilter, ...query } = new OrganizationQueryBuilder(
+      filter,
+    ).build();
+    const organizations = await this.organizationRepo.findMany({
+      where: {
+        ...whereFilter,
+        memberships: {
+          some: {
+            userId,
+          },
+        },
+      },
+      ...query,
+      select: {
+        name: true,
+        id: true,
+        memberships: {
+          where: {
+            userId,
+          },
+          select: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    const totalResults = await this.organizationRepo.count({
+      where: {
+        ...whereFilter,
+        memberships: {
+          some: {
+            userId,
+          },
+        },
+      },
+    });
+
+    const data = organizations.flatMap((organization) => {
+      return {
+        organizationId: organization.id,
+        name: organization.name,
+        role: organization.memberships[0].role,
+      };
+    });
+
+    const totalPages = Math.ceil(totalResults / filter.limit);
+
+    return {
+      data,
+      pagination: {
+        total: totalPages,
+        perPage: filter.limit,
+        page: filter.page,
+        hasNext: filter.page < totalPages,
+        hasPrev: filter.page > 1,
+      },
+    };
+  }
+
+  async AddMember(addMembershipDto: AddMemberDTO, orgId: string) {
+    const { email, role } = addMembershipDto;
+
+    const newMember = await this.userService.findOneByEmail(email);
+
+    if (!newMember) {
+      throw new NotFoundException('Usuário não econtrado');
+    }
+
+    await this.membershipsServ.addMembership(
+      { role, userId: newMember.id },
+      orgId,
+    );
   }
 
   async sumarryDashboard(orgId: string, userId: string) {
@@ -126,7 +210,7 @@ export class OrganizationsService {
 
   private formatActivityFeed(logs: any[], currentUserId: string) {
     return logs.map(log => {
-      const actorName = log.userId === currentUserId ? 'Você' : log.user.name;
+      const actorName = log.userId === currentUserId || log.userId == null ? 'Você' : log.user.name;
       const metadata = log.metadata || {}; // O JSON que gravamos lá atrás
 
       let description = '';
@@ -163,7 +247,7 @@ export class OrganizationsService {
       return {
         id: log.id,
         actor: actorName,
-        actorAvatar: log.user.avatar,
+        actorAvatar: log.user ? log.user.avatar : undefined,
         description: description,
         fullText: `${actorName} ${description}`,
         createdAt: log.createdAt,

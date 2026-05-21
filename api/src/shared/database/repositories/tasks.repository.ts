@@ -14,6 +14,10 @@ export class TasksRepository {
     return this.prismaService.task.findUnique(findDto);
   }
 
+  delete(deleteDto: Prisma.TaskDeleteArgs) {
+    return this.prismaService.task.delete(deleteDto);
+  }
+
   findFirst(findDto: Prisma.TaskFindFirstArgs) {
     return this.prismaService.task.findFirst(findDto);
   }

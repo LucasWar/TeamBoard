@@ -7,6 +7,7 @@ import {
 // import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from 'src/shared/database/repositories/user.repository';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -46,6 +47,7 @@ export class UsersService {
         id,
       },
       select: {
+        id: true,
         name: true,
         email: true,
         avatar: true,
@@ -102,6 +104,41 @@ export class UsersService {
     });
 
     return user;
+  }
+
+  async update(dto: UpdateUserDto, id: string) {
+    const { email } = dto;
+    const user = await this.userRepo.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado para atualização');
+    }
+
+    const ownerEmail = await this.userRepo.findFirst({
+      where: {
+        email,
+        id: {
+          not: id,
+        },
+      },
+    });
+
+    if (ownerEmail) {
+      throw new ConflictException('Email ja esta registrado');
+    }
+
+    await this.userRepo.update({
+      where: {
+        id,
+      },
+      data: {
+        ...dto,
+      },
+    });
   }
 
   // update(id: number, updateUserDto: UpdateUserDto) {
