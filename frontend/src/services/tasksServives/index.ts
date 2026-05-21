@@ -1,5 +1,6 @@
 
 import { create } from "./create";
+import { deleteTask } from "./delete";
 import { listMyTasks } from "./listMyTasks";
 import { recentTasksByPriority } from "./listRecentTasksByPriority";
 import { myKpis } from "./listTasksByProject";
@@ -15,4 +16,5 @@ export const tasksService = {
   listMyTasks,
   create,
   update,
+  deleteTask,
 }

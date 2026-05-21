@@ -10,6 +10,8 @@ import { ProjectsDashboard } from "../ui/pages/Projects";
 import { MyOrganizations } from "../ui/pages/organizations";
 import { KanbanBoard } from "../ui/pages/kaban";
 import { MyTasks } from "../ui/pages/myTasks";
+import { Members } from "../ui/pages/members";
+import { EnumRoles } from "../app/enums/roles";
 
 
 export function Router() {
@@ -35,6 +37,11 @@ export function Router() {
             <Route path='projects/tasks/:idProject' element={<KanbanBoard />}/> 
             <Route path='myTasks' element={<MyTasks />}/> 
           </Route>
+        </Route>
+        <Route element={<AuthGuard isPrivate={true} roles={[EnumRoles.ADMIN, EnumRoles.MANAGER]}/>}>
+            <Route element={<DashboardLayout />} >
+              <Route path='members' element={<Members />}/> 
+            </Route>
         </Route>
       </Routes>
     </BrowserRouter>

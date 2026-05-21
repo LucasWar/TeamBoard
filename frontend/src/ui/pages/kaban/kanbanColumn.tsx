@@ -8,9 +8,10 @@ interface KanbanColumnProps {
   title: string
   tasks: Task[]
   handleEdit: (task: EditTask) => void
+  handleDelete: (id: string) => void
 }
 
-export function KanbanColumn({id, tasks, title, handleEdit}: KanbanColumnProps){
+export function KanbanColumn({id, tasks, title, handleEdit, handleDelete}: KanbanColumnProps){
   const { setNodeRef } = useDroppable({
     id,
     data: {
@@ -37,6 +38,7 @@ export function KanbanColumn({id, tasks, title, handleEdit}: KanbanColumnProps){
               key={task.id}
               task={task}
               onEdit={handleEdit}
+              onDelete={handleDelete}
             />
             
           ))}

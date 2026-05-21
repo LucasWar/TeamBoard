@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { projectService } from "../../../../services/projectsServices";
 import { useEffect } from "react";
-import type { EditProject } from "../../../../assets/interfaces/projetcs";
 import toast from "react-hot-toast";
+import type { EditProject } from "../../../../app/interfaces/projetcs";
 
 export function useProjectModal(projectId?: string, projectData?: Omit<EditProject, 'id'>, onClose?: () => void){
   const queryClient = useQueryClient();

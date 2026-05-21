@@ -3,18 +3,20 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { priorityMap } from "../../../app/utils/priorityMap";
 import { cn } from "../../../lib/utils";
-import type { EditTask, Task } from "../../../assets/interfaces/task";
 import { formatDateBR } from "../../../app/utils/formarDate";
 import { useMemo } from "react";
 import { X } from "lucide-react";
+import type { EditTask } from "../../../app/interfaces/editTask";
+import type { Task } from "../../../app/interfaces/task";
 
 interface KanbanCardProps {
   task: Task
   isOverlay?: boolean;
   onEdit: (task: EditTask) => void
+  onDelete: (id: string) => void
 }
 
-export function KanbanCard({ task, isOverlay, onEdit }: KanbanCardProps) {
+export function KanbanCard({ task, isOverlay, onEdit, onDelete }: KanbanCardProps) {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: task.id,
     data: {
@@ -65,7 +67,7 @@ export function KanbanCard({ task, isOverlay, onEdit }: KanbanCardProps) {
             e.stopPropagation()
             e.preventDefault()
 
-            console.log('Excluir')
+            onDelete(task.id)
           }}
         > 
           <X className="w-4 h-4"/>

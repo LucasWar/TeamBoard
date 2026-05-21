@@ -4,7 +4,7 @@ import { Button } from "../../../assets/components/Button";
 import { useRegisterController } from "./useRegisterController";
 
 import { Controller } from "react-hook-form";
-import { ImageInput } from "./imageInput";
+import { ImageInput } from "../../../components/imageInput";
 
 
 export function Register() {

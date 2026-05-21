@@ -1,6 +1,7 @@
 import { api } from "../../lib/axios"
 
 interface MeResonse {
+  id: string
   name: string
   email: string 
   avatar?: string

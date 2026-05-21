@@ -2,14 +2,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, useCallback, useEffect, useState } from "react";
 import { usersService } from "../../services/userServices";
 import { localStorageKeys } from "../config/localStorageKeys";
+import type { User } from "../interfaces/user";
 
 interface AuthContextValue {
   isFetchingAuth: boolean;
   signedIn: boolean;
   signin(accesseToken:string): void; 
   signout(): void;
-  userName?: string
-  avatar?: string
+  user: User
 }
 
 export const AuthContext = createContext({} as AuthContextValue);
@@ -48,7 +48,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
   }, [isError, signout])
   
   return (
-    <AuthContext.Provider value={{ signedIn: isSuccess && signedIn, signin, signout, isFetchingAuth: isFetching, userName: me?.name, avatar: me?.avatar }}>
+    <AuthContext.Provider value={{ signedIn: isSuccess && signedIn, signin, signout, isFetchingAuth: isFetching, user: me! }}>
       {children}
     </AuthContext.Provider>
   );

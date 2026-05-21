@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { tasksService } from "../../../services/tasksServives"
 import { useEffect, useState } from "react"
 import { arrayMove } from '@dnd-kit/sortable';
@@ -15,6 +15,7 @@ import type { EditTask, Task } from "../../../app/interfaces/task";
 
 
 export function useControllerKaban(idProject: string){
+  const queryClient = useQueryClient();
   const [tasks, setTasks] = useState<Task[] | null>(null)
   const [selectedTasks, setSelectedTasks] = useState<EditTask | null>(null)
   
@@ -23,6 +24,15 @@ export function useControllerKaban(idProject: string){
   const { data, isSuccess } = useQuery({
     queryKey: ['listTasks', idProject],
     queryFn: () => tasksService.listTasksByProjectId(idProject)
+  })
+
+  const { mutateAsync: deleteTask } = useMutation({
+    mutationFn: async (id:string) => {
+      await tasksService.deleteTask(id)
+    },
+    onSuccess:() => {
+      queryClient.invalidateQueries({ queryKey: ['listTasks'] });
+    }
   })
 
   useEffect(() => {
@@ -39,6 +49,15 @@ export function useControllerKaban(idProject: string){
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
   
+  function handleDeleteTask(id:string){
+    try {
+      deleteTask(id)
+    }
+    catch(error){
+      console.log(error)
+    }
+  }
+
   function handleCloseModal(){
     setOpenModal(false)
   }
@@ -48,7 +67,6 @@ export function useControllerKaban(idProject: string){
   }
 
   function handleOpenEditModal(task: EditTask){
-    console.log(task)
     setSelectedTasks(task)
     setOpenModal(true)
   }
@@ -136,5 +154,5 @@ export function useControllerKaban(idProject: string){
     });
   };
 
-  return {tasks, setTasks, handleDragEnd, sensors, activeTask, setActiveTask, handleDragStart, handleCloseModal, openModal, handleOpenModal, handleOpenEditModal, selectedTasks}
+  return {tasks, setTasks, handleDragEnd, sensors, activeTask, setActiveTask, handleDragStart, handleCloseModal, openModal, handleOpenModal, handleOpenEditModal, selectedTasks, handleDeleteTask}
 }

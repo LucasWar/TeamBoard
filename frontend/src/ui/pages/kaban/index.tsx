@@ -28,7 +28,7 @@ export function KanbanBoard() {
     return (<div>Id não encontrado</div>);
   }
   
-  const { tasks, activeTask, handleDragEnd, handleDragStart, sensors, openModal, handleCloseModal, handleOpenModal, handleOpenEditModal, selectedTasks } = useControllerKaban(idProject);
+  const { tasks, activeTask, handleDragEnd, handleDragStart, sensors, openModal, handleCloseModal, handleOpenModal, handleOpenEditModal, selectedTasks, handleDeleteTask } = useControllerKaban(idProject);
   
   return (
     <div className="flex-1 p-8 bg-gray-50 min-h-screen overflow-x-auto">
@@ -62,6 +62,7 @@ export function KanbanBoard() {
                   title={column.title}
                   tasks={tasks.filter(t => t.status === column.id)}
                   handleEdit={handleOpenEditModal}
+                  handleDelete={handleDeleteTask}
                 />
               );
             }
@@ -71,7 +72,7 @@ export function KanbanBoard() {
 
         <DragOverlay>
           {activeTask ? (
-            <KanbanCard task={activeTask} isOverlay={true} onEdit={handleOpenEditModal} />
+            <KanbanCard task={activeTask} isOverlay={true} onEdit={handleOpenEditModal} onDelete={handleDeleteTask}/>
           ) : null}
         </DragOverlay>
       </DndContext>

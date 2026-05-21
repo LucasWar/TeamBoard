@@ -4,9 +4,10 @@ import type { listProjectsFilter } from "../../../services/projectsServices/list
 import { useOrganization } from "../../../app/hooks/useOrganization";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { projectService } from "../../../services/projectsServices";
-import type { EditProject } from "../../../assets/interfaces/projetcs";
 import type { ChangeStatusProjectParams } from "../../../services/projectsServices/archiveProject";
 import toast from "react-hot-toast";
+import type { EditProject } from "../../../app/interfaces/projetcs";
+import { createPageHandler } from "../../../app/utils/controllerPages";
 
 export function useControllerProject() {
   const queryClient = useQueryClient();
@@ -22,6 +23,8 @@ export function useControllerProject() {
   const [selectedProject,setSelectedProject] = useState<EditProject | null>(null)
 
   const { data } = useListProject(filter)
+
+  const handlePageChange = createPageHandler(setFilter);
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -50,14 +53,6 @@ export function useControllerProject() {
       queryClient.invalidateQueries({ queryKey: ['listProjects'] });
     }
   });
-
-  function handleControllerPage(value: number){ 
-    setFilter(obj => ({
-      ...obj,
-      page: value,
-    }))
-    console.log(filter)
-  }
 
   function handleCloseModal(){
     setOpenModal(false)
@@ -116,15 +111,12 @@ export function useControllerProject() {
     }))
   }
 
-
-
   return { 
     filter,
     projectsData: data ? data.data.data : [],
     projectsPagination: data ? data.data.pagination : undefined,
     openModal,
     currentRole,
-    handleControllerPage,
     openDeleteModal,
     selectedProject,
     handleCloseModal,
@@ -138,6 +130,8 @@ export function useControllerProject() {
     handleCreateProject,
     handleEditProject,
     confirmDelete,
-    handleArqchiveProject
+    handleArqchiveProject,
+    handlePageChange
+
   }
 }

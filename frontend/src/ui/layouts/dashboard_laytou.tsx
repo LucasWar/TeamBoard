@@ -3,9 +3,11 @@ import { UserMenu } from "../../components/UserMenu";
 import { BookOpenIcon, Building, FolderKanbanIcon, UserIcon } from "lucide-react";
 import { Separator } from "radix-ui";
 import { DashboardIcon } from "@radix-ui/react-icons";
+import { useOrganization } from "../../app/hooks/useOrganization";
+import { EnumRoles } from "../../app/enums/roles";
 
 export function DashboardLayout(){ 
-
+  const { currentRole } = useOrganization()
   return (
     <div className="h-full">
       {/* <header className="bg-red h-13 text-2xl flex items-center justify-center relative bg-white">
@@ -48,10 +50,15 @@ export function DashboardLayout(){
                 <span>Minhas tarefas</span>
               </div>
             </Link>
-            <div className="flex items-center gap-2">
-              <UserIcon className="w-5 h-5" />
-              <span>Membros</span>
-            </div>
+            { currentRole !== EnumRoles.USER && (
+              <Link to="/members">
+                <div className="flex items-center gap-2">
+                  <UserIcon className="w-5 h-5" />
+                  <span>Membros</span>
+                </div>
+              </Link>
+              )
+            }
             <Link to="/myOrganizations">
               <div className="flex items-center gap-2">
                 <Building className="w-5 h-5" />

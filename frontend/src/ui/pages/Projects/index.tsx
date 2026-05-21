@@ -27,7 +27,7 @@ export function ProjectsDashboard(){
           confirmDelete,
           openDeleteModal,
           handleArqchiveProject,
-          handleControllerPage,
+          handlePageChange,
           filter,
         } = useControllerProject()
 
@@ -50,6 +50,10 @@ export function ProjectsDashboard(){
         onClose={handleCloseDeleteModal}
         onConfirm={confirmDelete}
       />
+      <header className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-800">Meus Projetos</h1>
+        <p className="text-sm text-gray-500 mt-1">Gestão centralizada de todos os seus projetos.</p>
+      </header>
       <div className="ml-4 mt-4 flex justify-between">
         <div className="flex items-center gap-2 pl-2 bg-white border border-gray-300">
           <span>Status</span>
@@ -89,7 +93,7 @@ export function ProjectsDashboard(){
           </div> */}
           {
             (currentRole == EnumRoles.MANAGER || currentRole == EnumRoles.ADMIN) &&
-            <button className="bg-blue-600 px-2 text-white rounded-xs" onClick={() => handleCreateProject()}>Novo projeto</button>
+            <button className="bg-blue-600 px-2 text-white rounded-md" onClick={() => handleCreateProject()}>Novo projeto</button>
           }
         </div>
       </div>
@@ -117,7 +121,7 @@ export function ProjectsDashboard(){
           <Pagination 
             currentPage={filter.page}
             totalPages={projectsPagination.total}
-            onPageChange={handleControllerPage}
+            onPageChange={handlePageChange}
           />
         }
       {

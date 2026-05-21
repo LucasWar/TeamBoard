@@ -32,8 +32,8 @@ export function useControllerOnboarding() {
 
   const handleSubmit = handleCreateOrganization(async (data) => {
     try {
-        const { id } = await mutateAsync(data)
-        changeOrganization(id)
+      const { id } = await mutateAsync(data)
+      changeOrganization(id)
     }
     catch(error){
       console.log(error)

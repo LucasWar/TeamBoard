@@ -4,11 +4,6 @@ import { TaskItem } from './components/sectionItem';
 export function MyTasks() {
   const {tasks, completeTask} = useMyTasksController()
 
-
-  if(!tasks) {
-    return <h1>Ola</h1>
-  }
-
   return (
     <div className="flex-1 p-8">
       <header className="mb-8">
@@ -19,7 +14,7 @@ export function MyTasks() {
       <div className="w-full space-y-8">
         
         {/* SECÇÃO: ATRASADAS */}
-        {tasks.late.length > 0 && (
+        {tasks && tasks.late.length > 0 && (
           <section>
             <h2 className="text-xs font-bold text-red-600 uppercase tracking-wider mb-4 flex items-center gap-2">
               <span className="w-2 h-2 bg-red-600 rounded-full"></span>
@@ -38,7 +33,7 @@ export function MyTasks() {
             Hoje
           </h2>
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-            {tasks.today.length > 0 ? (
+            {tasks && tasks.today.length > 0 ? (
               tasks.today.map(task => <TaskItem key={task.id} task={task} onComplete={completeTask}/>)
             ) : (
               <p className="p-4 text-sm text-gray-400 italic">Sem tarefas para hoje. Bom trabalho!</p>
@@ -53,7 +48,7 @@ export function MyTasks() {
             Próximas
           </h2>
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-            {tasks.upcoming.map(task => <TaskItem key={task.id} task={task} onComplete={completeTask}/>)}
+            {tasks &&  tasks.upcoming.map(task => <TaskItem key={task.id} task={task} onComplete={completeTask}/>)}
           </div>
         </section>
 

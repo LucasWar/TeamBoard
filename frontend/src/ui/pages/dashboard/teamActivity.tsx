@@ -9,7 +9,7 @@ export function TeamActivity() {
       <div className="relative border-l border-gray-200 ml-3 space-y-6">
         {
           teamActivities ? teamActivities.map((teamActivitie) => (
-            <div className="pl-4 relative">
+            <div className="pl-4 relative" key={teamActivitie.id}>
               <div className="w-3 h-3 bg-blue-500 rounded-full absolute -left-[6.5px] top-1.5 ring-4 ring-white"></div>
               <p className="text-sm text-gray-800"><strong>{teamActivitie.actor}</strong> {teamActivitie.description}.</p>
               <span className="text-xs text-gray-400">Há {getTimeDifference(teamActivitie.createdAt)}</span>

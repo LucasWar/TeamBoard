@@ -1,23 +1,35 @@
 import { useState, useEffect } from "react";
-import userImage from "../../../assets/userImage.png";
+import userImage from "../assets/userImage.png";
 import { Avatar } from "radix-ui";
+import { cn } from "../app/utils/cn";
 
 interface ImageInputProps {
   value?: File | null;
   onChange: (file: File | null) => void;
+  className?: string;
+  preview?: string | null
 }
 
-export function ImageInput({ onChange, value }: ImageInputProps) {
-  const [preview, setPreview] = useState<string | null>(null);
+export function ImageInput({ onChange, value, className, preview }: ImageInputProps) {
+  const [image, setImage] = useState<string | null>(null);
+  const [imageDefault, setImageDefault] = useState<string>(userImage);
+
+  useEffect(() => {
+    if (preview) {
+      setImageDefault(
+        `${import.meta.env.VITE_BASE_URL}/uploads/users/${preview}`
+      );
+    }
+  }, [preview]);
 
   useEffect(() => {
     if (!value) {
-      setPreview(null);
+      setImage(null);
       return;
     }
 
     const url = URL.createObjectURL(value);
-    setPreview(url);
+    setImage(url);
 
     return () => URL.revokeObjectURL(url);
   }, [value]);
@@ -31,10 +43,10 @@ export function ImageInput({ onChange, value }: ImageInputProps) {
     <>
       <label htmlFor="imageInput">
         <div className="flex items-center justify-center gap-3">
-          <Avatar.Root className="inline-flex size-45 items-center justify-center overflow-hidden rounded-full">
+          <Avatar.Root className={cn("inline-flex size-45 items-center justify-center overflow-hidden rounded-full", className)}>
             <Avatar.Image
               className="size-full object-cover"
-              src={preview || userImage}
+              src={image || imageDefault}
               alt="User avatar"
             />
           </Avatar.Root>
