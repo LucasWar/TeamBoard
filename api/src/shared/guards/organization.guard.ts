@@ -31,7 +31,6 @@ export class OrganizationGuard implements CanActivate {
         'O cabeçalho x-organization-id é obrigatório.',
       );
     }
-
     const membership = await this.membershipsService.getMembershipByUserAndOrg(
       user.userId,
       orgId,

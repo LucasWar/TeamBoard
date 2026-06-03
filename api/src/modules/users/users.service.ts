@@ -8,6 +8,7 @@ import {
 import { UserRepository } from 'src/shared/database/repositories/user.repository';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -74,8 +75,8 @@ export class UsersService {
             organization: {
               select: {
                 name: true,
-              }
-            }
+              },
+            },
           },
         },
       },
@@ -137,6 +138,37 @@ export class UsersService {
       },
       data: {
         ...dto,
+      },
+    });
+  }
+
+  async changePassword(dto: ChangePasswordDto, id: string) {
+    const { newPassword, oldPassword } = dto;
+
+    const user = await this.userRepo.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado para atualização');
+    }
+
+    const valid = await bcrypt.compare(oldPassword, user.passwordHash);
+
+    if (!valid) {
+      throw new ConflictException('Senha antiga informada não coincidem');
+    }
+
+    const hashNewPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.userRepo.update({
+      where: {
+        id,
+      },
+      data: {
+        passwordHash: hashNewPassword,
       },
     });
   }

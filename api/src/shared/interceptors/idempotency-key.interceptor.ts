@@ -5,21 +5,21 @@ import {
   CallHandler,
   BadRequestException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { AuditLogService } from 'src/modules/audit-log/audit-log.service';
 import { AuthUser } from '../interfaces/auth-user.interface';
 import type { Request } from 'express';
-import { TasksRepository } from '../database/repositories/tasks.repository';
+import { RedisService } from 'src/modules/redis/redis.service';
 
 @Injectable()
-export class TesteInterceptor implements NestInterceptor {
-  constructor(
-    private readonly auditLogService: AuditLogService,
-    private readonly taskRepo: TasksRepository,
-  ) {}
+export class IdempotencyInteceptor implements NestInterceptor {
+  constructor(private readonly redisService: RedisService) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<unknown>> {
+    const redis = this.redisService.getClient();
     const request = context
       .switchToHttp()
       .getRequest<Request & { user?: AuthUser }>();
@@ -29,11 +29,33 @@ export class TesteInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    console.log('antes da execução');
+    const idempotencyKey = request.headers['x-idempotency-key'] as
+      | string
+      | undefined;
+
+    if (!idempotencyKey) {
+      throw new BadRequestException(
+        'Chave de idempotencia necessária para essa requisição',
+      );
+    }
+
+    const cachedResponse = await redis.get(idempotencyKey);
+
+    if (cachedResponse) {
+      return of({
+        idempotencyKey: idempotencyKey,
+        ...JSON.parse(cachedResponse),
+      });
+    }
 
     return next.handle().pipe(
-      tap(() => {
-        console.log('Apos a excecução');
+      tap((data) => {
+        void redis.set(idempotencyKey, JSON.stringify(data), {
+          expiration: {
+            type: 'EX',
+            value: 3600,
+          },
+        });
       }),
     );
   }

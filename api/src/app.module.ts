@@ -12,6 +12,9 @@ import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { CommentsModule } from './modules/comments/comments.module';
+import { RedisModule } from './modules/redis/redis.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { IdempotencyInteceptor } from './shared/interceptors/idempotency-key.interceptor';
 
 @Module({
   imports: [
@@ -28,8 +31,15 @@ import { CommentsModule } from './modules/comments/comments.module';
     ProjectsModule,
     TasksModule,
     CommentsModule,
+    RedisModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: IdempotencyInteceptor,
+    },
+  ],
 })
 export class AppModule {}

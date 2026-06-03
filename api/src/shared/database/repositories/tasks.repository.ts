@@ -32,6 +32,8 @@ export class TasksRepository {
         t.title AS "taskTitle", 
         t.due_date AS "dueDate", 
         t.priority, 
+        t.id,
+        t.status,
         p.name AS "projectName"
       FROM "Task" t
       INNER JOIN "Project" p ON t.project_id = p.id
@@ -40,12 +42,11 @@ export class TasksRepository {
         AND p.status = 'ACTIVE'
         AND t.status NOT IN ('DONE', 'BLOCKED')
         AND t.deleted_at IS NULL
+        AND t.priority IN ('URGENT','HIGH')
       ORDER BY 
         CASE t.priority
           WHEN 'URGENT' THEN 1
           WHEN 'HIGH'   THEN 2
-          WHEN 'MEDIUM' THEN 3
-          WHEN 'LOW'    THEN 4
           ELSE 5
         END ASC,
         t.due_date ASC
