@@ -19,7 +19,7 @@ Painel principal com resumo de projetos recentes e histórico de ações realiza
 * Atualizações automáticas de atividade
 
 <p align="center">
-  <img src="URL_DA_IMAGEM_DASHBOARD" alt="Dashboard do TeamBoard" width="800"/>
+  <img src="img/dashboard.png" alt="Dashboard do TeamBoard" width="800"/>
 </p>
 
 ---
@@ -29,7 +29,7 @@ Painel principal com resumo de projetos recentes e histórico de ações realiza
 Sistema de gerenciamento visual de tarefas com drag and drop e atualização otimista no frontend.
 
 <p align="center">
-  <img src="URL_DA_IMAGEM_KANBAN" alt="Kanban do TeamBoard" width="800"/>
+  <img src="img/kanban.png" alt="Kanban do TeamBoard" width="800"/>
 </p>
 
 ---
@@ -43,7 +43,7 @@ Visão consolidada das tarefas do usuário entre diferentes projetos.
 * Atualizações reativas com React Query
 
 <p align="center">
-  <img src="URL_DA_IMAGEM_TASKS" alt="Minhas Tarefas do TeamBoard" width="800"/>
+  <img src="img/minhasTarefas.png" alt="Minhas Tarefas do TeamBoard" width="800"/>
 </p>
 
 ---
@@ -53,7 +53,7 @@ Visão consolidada das tarefas do usuário entre diferentes projetos.
 Painel administrativo para gerenciamento de membros da organização e permissões baseadas em papéis.
 
 <p align="center">
-  <img src="URL_DA_IMAGEM_MEMBROS" alt="Gestão de Membros do TeamBoard" width="800"/>
+  <img src="img/membros.png" alt="Gestão de Membros do TeamBoard" width="800"/>
 </p>
 
 ---
@@ -173,7 +173,7 @@ O feed é montado dinamicamente durante as consultas, evitando joins excessivame
 
 ```bash
 teamboard/
-├── backend/
+├── api/
 │   ├── src/
 │   │   ├── modules/
 │   │   ├── shared/
