@@ -7,10 +7,10 @@ import {
   Delete,
   UseGuards,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
-//import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { AuthUser } from 'src/shared/interfaces/auth-user.interface';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -20,6 +20,7 @@ import { Roles } from 'src/shared/decorators/role.decorator';
 import { CurrentOrg } from 'src/shared/decorators/current-organization.decorator';
 import { AddMemberDTO } from './dto/add-member';
 import { FilterOrganizationDto } from './dto/filter-organization.dto';
+import { IdempotencyInteceptor } from 'src/shared/interceptors/idempotency-key.interceptor';
 
 @Controller('organizations')
 @UseGuards(JwtAuthGuard)
@@ -27,6 +28,7 @@ export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
   @Post()
+  @UseInterceptors(IdempotencyInteceptor)
   create(
     @Body() createOrganizationDto: CreateOrganizationDto,
     @CurrentUser() user: AuthUser | undefined,
@@ -92,6 +94,7 @@ export class OrganizationsController {
 
   @Post('addMember')
   @UseGuards(OrganizationGuard, RolesGuard)
+  @UseInterceptors(IdempotencyInteceptor)
   @Roles('ADMIN')
   addMember(
     @Body() addMembershipDto: AddMemberDTO,

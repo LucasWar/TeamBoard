@@ -56,7 +56,7 @@ export class AuthController {
       storage: diskStorage({
         destination: './uploads/users',
         filename: (
-          req: Request, 
+          req: Request,
           file: Express.Multer.File, 
           callback: (error: Error | null, filename: string) => void
         ) => {

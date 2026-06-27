@@ -134,6 +134,11 @@ export class OrganizationsService {
       { role, userId: newMember.id },
       orgId,
     );
+
+    return {
+      name: newMember.name,
+      message: 'Membro adicionado com sucesso',
+    }
   }
 
   async sumarryDashboard(orgId: string, userId: string) {

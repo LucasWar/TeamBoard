@@ -38,7 +38,6 @@ export class IdempotencyInteceptor implements NestInterceptor {
         'Chave de idempotencia necessária para essa requisição',
       );
     }
-
     const cachedResponse = await redis.get(idempotencyKey);
 
     if (cachedResponse) {
@@ -47,7 +46,6 @@ export class IdempotencyInteceptor implements NestInterceptor {
         ...JSON.parse(cachedResponse),
       });
     }
-
     return next.handle().pipe(
       tap((data) => {
         void redis.set(idempotencyKey, JSON.stringify(data), {

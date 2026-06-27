@@ -41,6 +41,7 @@ export class UsersController {
   // }
 
   @Patch()
+  @UseInterceptors(IdempotencyInteceptor)
   update(@CurrentUser() user: AuthUser, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(updateUserDto, user.userId);
   }

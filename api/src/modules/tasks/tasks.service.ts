@@ -135,6 +135,7 @@ export class TasksService {
       },
       data: {
         ...rest,
+        assigneeId: assigned,
       },
     });
   }

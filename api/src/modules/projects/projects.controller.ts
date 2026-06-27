@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -20,6 +21,7 @@ import { Roles } from 'src/shared/decorators/role.decorator';
 import { CurrentOrg } from 'src/shared/decorators/current-organization.decorator';
 import { FilterProjectDto } from './dto/filter-project.dto';
 import { ChangeStatusDto } from './dto/change-status.dto';
+import { IdempotencyInteceptor } from 'src/shared/interceptors/idempotency-key.interceptor';
 
 @Controller('projects')
 @UseGuards(JwtAuthGuard, OrganizationGuard, RolesGuard)
@@ -28,6 +30,7 @@ export class ProjectsController {
 
   @Post()
   @Roles('ADMIN', 'MANAGER')
+  @UseInterceptors(IdempotencyInteceptor)
   create(
     @Body() createProjectDto: CreateProjectDto,
     @CurrentOrg() orgId: string,
@@ -43,6 +46,7 @@ export class ProjectsController {
 
   @Patch(':id')
   @Roles('ADMIN', 'MANAGER')
+  @UseInterceptors(IdempotencyInteceptor)
   update(
     @Param('id') projectId: string,
     @Body() updateProjectDto: UpdateProjectDto,

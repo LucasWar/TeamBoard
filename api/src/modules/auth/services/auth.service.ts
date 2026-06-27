@@ -104,7 +104,7 @@ export class AuthService {
       { sub: userId, email },
       {
         secret: process.env.JWT_ACCESS_SECRET,
-        expiresIn: '15min',
+        expiresIn: '5s',
       },
     );
 
