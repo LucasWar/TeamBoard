@@ -1,11 +1,13 @@
-import { Controller } from "react-hook-form";
-import { Button } from "../../../../assets/components/Button";
-import type { EditTask, Task } from "../../../../assets/interfaces/task";
-import { Modal } from "../../../../components/Modal";
+import type { EditTask } from "../../../../app/interfaces/editTask";
+import { useTaskModalController } from "./useTaskModalController";
 import { PriorityTask } from "../../../../app/enums/priorityTask";
-import { Select } from "../../../../components/Select";
 import { priorityMap } from "../../../../app/utils/priorityMap";
-import { useTaskModal } from "./useTaskModal";
+import { Button } from "../../../../assets/components/Button";
+import { Select } from "../../../../components/Select";
+import { Modal } from "../../../../components/Modal";
+import { Controller } from "react-hook-form";
+import { useEffect } from "react";
+
 
 interface CreateProjectModalProps {
   projetcId: string;
@@ -24,13 +26,12 @@ export function TasktModal({onClose, open, taskRecord, projetcId}:CreateProjectM
     taskData = rest;
   }
 
-  const { handleSubmit, register, errors, control } = useTaskModal(
+  const { handleSubmit, register, errors, control } = useTaskModalController(
     projetcId,
     taskRecord?.id,
     taskData,
     onClose,
   );
-
 
   return(
     <Modal open={open} title={isEditing ? "Editar tarefa" : "Criar um tarefa"} onClose={onClose}>

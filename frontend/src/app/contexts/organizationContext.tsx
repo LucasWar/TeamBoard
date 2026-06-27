@@ -2,7 +2,6 @@ import { createContext, useCallback, useEffect, useState } from "react";
 import { localStorageKeys } from "../config/localStorageKeys";
 import { useAuth } from "../hooks/useAuth";
 import { EnumRoles } from "../enums/roles";
-import type { GetMyOrganizationsData } from "../../services/userServices/myOrganizations";
 import { useListOrganizations } from "../hooks/useListOrganizations";
 
 // 1. Limpamos a Interface (Removemos searchTerm e filter daqui)

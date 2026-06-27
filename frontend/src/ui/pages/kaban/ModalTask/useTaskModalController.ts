@@ -1,16 +1,16 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import z from "zod";
-import toast from "react-hot-toast";
+import type { EditTask } from "../../../../app/interfaces/editTask";
 import { PriorityTask } from "../../../../app/enums/priorityTask";
 import { tasksService } from "../../../../services/tasksServives";
-import type { EditTask } from "../../../../assets/interfaces/task";
-import { useEffect } from "react";
 import { formatDateBR } from "../../../../app/utils/formarDate";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useEffect } from "react";
+import z from "zod";
 
 
-export function useTaskModal(projectId: string,taskId?: string, taskData?: Omit<EditTask, 'id'>, onClose?: () => void){
+export function useTaskModalController(projectId: string,taskId?: string, taskData?: Omit<EditTask, 'id'>, onClose?: () => void){
   const queryClient = useQueryClient();
   
   const schema = z.object({
@@ -40,17 +40,24 @@ export function useTaskModal(projectId: string,taskId?: string, taskData?: Omit<
     if (taskData) {
       reset({
         ...taskData,
-        assigneeEmail: taskData.assigneeEmail,
+        assigneeEmail: taskData.emailAssignee,
         dueDate: taskData.dueDate ? formatDateBR(String(taskData.dueDate),1) : undefined, // sua função aqui
       });
     } else {
-      reset();
+      console.log('ola')
+      reset({
+        title: "",
+        description: "",
+        assigneeEmail: "",
+        priority: undefined,
+        dueDate: undefined,
+      });
     }
   }, [taskId, reset]);
 
   const { mutateAsync: createTaskMutate} = useMutation({
-    mutationFn: async ({data, projectId}: {data:formData, projectId:string}) => {
-      await tasksService.create({task:data, projectId})
+    mutationFn: async ({data, projectId, idempotencyKey}: {data:formData, projectId:string, idempotencyKey: string}) => {
+      await tasksService.create({task:data, projectId}, idempotencyKey)
     },
     onSuccess: () => {
       toast.success('Tarefa criada com sucesso')
@@ -74,7 +81,15 @@ export function useTaskModal(projectId: string,taskId?: string, taskData?: Omit<
         console.log("Delete projeto")
       }
       else {
-        await createTaskMutate({data, projectId});
+        const idempotencyKey = crypto.randomUUID();
+        await createTaskMutate({data, projectId, idempotencyKey});
+        reset({
+          title: "",
+          description: "",
+          assigneeEmail: "",
+          priority: undefined,
+          dueDate: undefined,
+        });
       }
 
       if (onClose) {

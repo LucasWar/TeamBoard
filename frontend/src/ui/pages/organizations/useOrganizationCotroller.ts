@@ -59,7 +59,6 @@ export function useOrganizationController(){
   const handleChangeOrganizationLocal = (orgId: string) => {
     const org = organizations.find(o => o.organizationId === orgId);
     if (org) {
-      // Mandamos a org e o cargo. O Provider não precisa mais buscar nada!
       changeOrganization(org.organizationId, org.role);
     }
   };
@@ -82,11 +81,6 @@ export function useOrganizationController(){
     }
   }
 
-  
-  // 1. ESTADOS DE PESQUISA AGORA VIVEM AQUI
-  
-
-  // 2. DEBOUNCE DA PESQUISA AQUI
   useEffect(() => {
     const delay = setTimeout(() => {
       setFilter(prev => ({
@@ -98,7 +92,6 @@ export function useOrganizationController(){
     return () => clearTimeout(delay);
   }, [searchTerm]);
 
-  // 3. A BUSCA DE DADOS FICA AQUI
   const { data, isFetching } = useListOrganizations(signedIn, filter);
 
   const organizations = data?.data ?? [];

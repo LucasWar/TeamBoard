@@ -12,6 +12,13 @@ export interface CreateTaskParams {
   projectId: string
 }
 
-export async function create({task, projectId}: CreateTaskParams){
-  await api.post(`/tasks/${projectId}/create`,task)
+export async function create({task, projectId}: CreateTaskParams, idempotencyKey: string){
+  await api.post(`/tasks/${projectId}/create`,
+    task,
+    {
+      headers: {
+        "x-idempotency-key": idempotencyKey,
+      }
+    }
+  )
 }

@@ -1,6 +1,6 @@
 import { useAuth } from '../../../app/hooks/useAuth';
 import { Indicators } from './components/indicators/Indicators';
-import { NextTask } from './NextTask';
+import { NextTask } from './components/NextTask';
 import { TeamActivity } from './teamActivity';
 
 export function Dashboard() {

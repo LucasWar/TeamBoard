@@ -1,9 +1,9 @@
-import { CircleCheck, ClipboardPen, Ellipsis, Trash, UserRoundPlus } from "lucide-react";
+import { CircleCheck, ClipboardPen, Ellipsis, Trash } from "lucide-react";
 import { EnumRoles } from "../../../app/enums/roles";
 import { DropdownMenu } from "../../../components/DropdownMenu";
 import { cn } from "../../../lib/utils";
-import type { EditOrganization } from "../../../assets/interfaces/organization";
 import { enumPlan } from "../../../app/enums/plan";
+import type { EditOrganization } from "../../../app/interfaces/organization";
 
 export interface OrganizationCardProps {
   organizationId: string
@@ -84,12 +84,6 @@ export function OrganizationCard({name, organizationId, role, isSelectedOrganiza
                 <div className='flex gap-2'>
                   <ClipboardPen className='w-4 h-4'/>
                   Editar
-                </div>
-              </DropdownMenu.Item>
-              <DropdownMenu.Item>
-                <div className='flex gap-2'>
-                  <UserRoundPlus className='w-4 h-4'/>
-                  Adicionar membro  
                 </div>
               </DropdownMenu.Item>
             </DropdownMenu.Content>

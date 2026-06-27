@@ -6,8 +6,8 @@ import { useControllerOnboarding } from "./useContrllerOnboarding";
 import { Select } from "../../../components/Select";
 import { enumPlan } from "../../../app/enums/plan";
 import { Controller } from "react-hook-form";
-export function Onboarding() {
 
+export function Onboarding() {  
   const { signout } = useAuth()
   const { errors, handleSubmit, register, control } = useControllerOnboarding()
 

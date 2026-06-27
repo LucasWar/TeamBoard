@@ -25,7 +25,7 @@ function App() {
           </ModalProvider>
         </OrganizationProvider>
       </AuthProvider>
-      <ReactQueryDevtools buttonPosition="bottom-left"/>
+      {/* <ReactQueryDevtools buttonPosition="bottom-left"/> */}
     </QueryClientProvider>
   )
 }

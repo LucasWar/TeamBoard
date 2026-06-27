@@ -30,13 +30,13 @@ export function KanbanCard({ task, isOverlay, onEdit, onDelete }: KanbanCardProp
     transition,
   };
 
-  const taskDataEdit = useMemo(() => ({
+  const taskDataEdit:EditTask = useMemo(() => ({
     description: task.description,
     dueDate: task.dueDate,
     priority: task.priority,
     title: task.title,
     id: task.id,
-    assigneeEmail: task.assignee?.email
+    emailAssignee: task.assignee?.email
   }), [task]);
 
   if (isDragging && !isOverlay) {

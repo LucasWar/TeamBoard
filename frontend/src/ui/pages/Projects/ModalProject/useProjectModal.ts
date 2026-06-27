@@ -30,8 +30,8 @@ export function useProjectModal(projectId?: string, projectData?: Omit<EditProje
   }, [projectData, reset]);
 
   const { mutateAsync: createProjectMutate} = useMutation({
-    mutationFn: async (data: formData) => {
-      await projectService.createProject(data)
+    mutationFn: async ({data, idempotencyKey}:{data: formData, idempotencyKey: string}) => {
+      await projectService.createProject(data, idempotencyKey)
     },
     onSuccess: () => {
       toast.success('Projeto criado com sucesso')
@@ -55,7 +55,8 @@ export function useProjectModal(projectId?: string, projectData?: Omit<EditProje
         console.log("Delete projeto")
       }
       else {
-        await createProjectMutate(data);
+        const idempotencyKey = crypto.randomUUID();
+        await createProjectMutate({data, idempotencyKey});
       }
 
       if (onClose) {

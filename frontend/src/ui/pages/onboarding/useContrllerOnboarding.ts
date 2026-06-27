@@ -6,8 +6,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useOrganization } from "../../../app/hooks/useOrganization";
 
-export function useControllerOnboarding() {
+export function useControllerOnboarding() {  
   const queryClient = useQueryClient();
+
   const schema = z.object({
       name: z.string().nonempty('Nome não pode esta vazio'),
       plan: z.enum(enumPlan, 'Escolha um dos planos disponiveis'),
@@ -22,8 +23,8 @@ export function useControllerOnboarding() {
   type formData = z.infer<typeof  schema>
 
   const { mutateAsync } = useMutation({
-    mutationFn: async (data: formData) => { 
-      return await OrganizationService.create(data) 
+    mutationFn: async ({data, idempotencyKey}:{data: formData, idempotencyKey: string}) => { 
+      return await OrganizationService.create(data, idempotencyKey) 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myOrganizations'] });
@@ -32,7 +33,8 @@ export function useControllerOnboarding() {
 
   const handleSubmit = handleCreateOrganization(async (data) => {
     try {
-      const { id } = await mutateAsync(data)
+      const idempotencyKey = crypto.randomUUID();
+      const { id } = await mutateAsync({data, idempotencyKey})
       changeOrganization(id)
     }
     catch(error){

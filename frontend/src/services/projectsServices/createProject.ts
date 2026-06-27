@@ -5,6 +5,13 @@ export interface CreateProjectParams {
   description: string
 }
 
-export async function createProject(project: CreateProjectParams){
-  await api.post('/projects',project)
+export async function createProject(project: CreateProjectParams, idempotencyKey: string){
+  await api.post('/projects', 
+    project,
+    {
+      headers: {
+        "x-idempotency-key": idempotencyKey,
+      }
+    }
+  )
 }

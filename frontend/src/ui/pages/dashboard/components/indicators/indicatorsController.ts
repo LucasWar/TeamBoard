@@ -1,14 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { tasksService } from "../../../../../services/tasksServives";
-
+import { useMyKips } from "../../../../../app/hooks/useMyKips";
 
 export function useIndicatorController(){
-  const { data: mykips, isFetching:isFetchingMykips } = useQuery({
-    queryKey: ['myKips'],
-    queryFn: async () => {
-      return await tasksService.myKpis()
-    }
-  })
+  const { data: mykips, isFetching:isFetchingMykips } = useMyKips()
 
   return {
     mykips,

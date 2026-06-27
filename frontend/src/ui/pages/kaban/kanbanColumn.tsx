@@ -1,7 +1,9 @@
-import type { EditTask, Task } from "../../../assets/interfaces/task";
 import { KanbanCard } from "./kabanCard";
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import type { EditTask } from "../../../app/interfaces/editTask";
+import type { Task } from "../../../app/interfaces/task";
+
 interface KanbanColumnProps {
   id: string
   position?: number

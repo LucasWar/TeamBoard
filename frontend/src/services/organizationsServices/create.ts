@@ -10,7 +10,14 @@ interface CreateResponse {
   id: string
 }
 
-export async function create(params: CreateParams) {
-  const { data } = await api.post<CreateResponse>('organizations', params)
+export async function create(params: CreateParams, idempotencyKey: string) {
+  const { data } = await api.post<CreateResponse>('organizations', 
+    params,
+    {
+      headers: {
+        "x-idempotency-key": idempotencyKey,
+      }
+    }
+  )
   return data
 }

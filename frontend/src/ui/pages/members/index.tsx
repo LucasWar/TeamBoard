@@ -4,6 +4,7 @@ import { useOrganization } from '../../../app/hooks/useOrganization';
 import { roleMap } from '../../../app/utils/roleMap';
 import { cn } from '../../../app/utils/cn';
 import { Spinner } from '../../../assets/components/Spinner';
+import { Plus } from 'lucide-react';
 
 export function Members() {
   const { data: members, handleOpenModal, handleCloseModal, openModal, isPending } = useControllerMembers()
@@ -12,7 +13,8 @@ export function Members() {
   const canManageMembers = currentRole === 'ADMIN' || currentRole === 'MANAGER';
 
   if(isPending) {
-    return <Spinner />
+
+    return <div className='flex w-full justify-center items-center'><Spinner /></div>
   }
 
   return (
@@ -30,7 +32,7 @@ export function Members() {
         
         {/* RBAC NA PRÁTICA: O botão só existe se o usuário tiver permissão */}
         {canManageMembers && (
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors shadow-sm" onClick={() => handleOpenModal()}>
+          <button className="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors shadow-sm lg:flex" onClick={() => handleOpenModal()}>
             + Convidar Membro
           </button>
         )}
@@ -108,6 +110,9 @@ export function Members() {
           </table>
         </div>
       </div>
+      <button className="flex fixed bottom-3 right-3 bg-blue-600 p-3 rounded-full text-white lg:hidden" onClick={() => handleOpenModal()}>
+        <Plus />
+      </button>
     </div>
   );
 }

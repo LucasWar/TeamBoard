@@ -6,5 +6,5 @@ export interface EditTask {
   description: string,
   priority: PriorityTask,
   dueDate: string,
-  emailAssignee: string
+  emailAssignee?: string
 }

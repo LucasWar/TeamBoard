@@ -11,7 +11,8 @@ import {
 } from '@dnd-kit/core';
 import type { EnumStatusTask } from "../../../app/enums/statusTask";
 import { useUpdateStatusTask } from "../../../app/hooks/useUpdateStatusTask";
-import type { EditTask, Task } from "../../../app/interfaces/task";
+import type { Task } from "../../../app/interfaces/task";
+import type { EditTask } from "../../../app/interfaces/editTask";
 
 
 export function useControllerKaban(idProject: string){
@@ -60,6 +61,9 @@ export function useControllerKaban(idProject: string){
 
   function handleCloseModal(){
     setOpenModal(false)
+    if(selectedTasks) {
+      setSelectedTasks(null)
+    }
   }
 
   function handleOpenModal(){

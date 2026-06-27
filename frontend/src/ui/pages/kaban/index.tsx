@@ -23,18 +23,18 @@ export function KanbanBoard() {
   const location = useLocation();
 
   const { title, describe } = location.state || {};
+
+  const { tasks, activeTask, handleDragEnd, handleDragStart, sensors, openModal, handleCloseModal, handleOpenModal, handleOpenEditModal, selectedTasks, handleDeleteTask } = useControllerKaban(idProject ?? " ");
   
   if (!idProject) {
     return (<div>Id não encontrado</div>);
   }
   
-  const { tasks, activeTask, handleDragEnd, handleDragStart, sensors, openModal, handleCloseModal, handleOpenModal, handleOpenEditModal, selectedTasks, handleDeleteTask } = useControllerKaban(idProject);
   
   return (
     <div className="flex-1 p-8 bg-gray-50 min-h-screen overflow-x-auto">
       <header className="mb-8 flex justify-between items-start">
         <div>
-          <div className="text-sm text-gray-500 mb-1">Acme Corp / Projetos / {title}</div>
           <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
           <p className="text-gray-500 mt-2 max-w-2xl text-sm">
             {describe}
