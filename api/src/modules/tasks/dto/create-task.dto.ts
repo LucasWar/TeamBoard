@@ -1,4 +1,4 @@
-import { EnumPriority } from '@prisma/client';
+import { EnumPriority, EnumStatusTask } from '@prisma/client';
 import {
   IsDateString,
   IsEmail,
@@ -6,7 +6,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
 } from 'class-validator';
 
 export class CreateTaskDto {

@@ -1,6 +1,9 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
-// import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { OrganizationRepository } from 'src/shared/database/repositories/organization.repository';
 import { generateSlug } from 'src/shared/utils/generate-slug';
 import { AuthUser } from 'src/shared/interfaces/auth-user.interface';
@@ -11,6 +14,7 @@ import { UsersService } from '../users/users.service';
 import { AddMemberDTO } from './dto/add-member';
 import { FilterOrganizationDto } from './dto/filter-organization.dto';
 import { OrganizationQueryBuilder } from './builder/organizations-query-builder';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class OrganizationsService {
@@ -19,6 +23,7 @@ export class OrganizationsService {
     private readonly membershipsServ: MembershipsService,
     private readonly auditLogService: AuditLogService,
     private readonly userService: UsersService,
+    private readonly notificationService: NotificationsService,
   ) {}
 
   async create(
@@ -69,6 +74,7 @@ export class OrganizationsService {
         ...whereFilter,
         memberships: {
           some: {
+            status: 'ACTIVE',
             userId,
           },
         },
@@ -130,14 +136,31 @@ export class OrganizationsService {
       throw new NotFoundException('Usuário não econtrado');
     }
 
+    const organization = await this.organizationRepo.findUnique({
+      where: {
+        id: orgId,
+      },
+    });
+
+    if (!organization) {
+      throw new NotFoundException('Organização não encontrada');
+    }
+
     await this.membershipsServ.addMembership(
       { role, userId: newMember.id },
       orgId,
     );
 
+    await this.notificationService.createInvitationNotification(
+      newMember.email,
+      role,
+      organization.name,
+      organization.id,
+    );
+
     return {
       name: newMember.name,
-      message: 'Membro adicionado com sucesso',
+      message: 'Solicitação enviada com sucesso',
     }
   }
 

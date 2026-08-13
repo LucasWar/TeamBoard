@@ -1,9 +1,18 @@
-import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Patch,
+  Param,
+} from '@nestjs/common';
 import { MembershipsService } from './memberships.service';
 import { AddMembershipDTO } from './dto/add-membership.dto';
 import { CurrentOrg } from 'src/shared/decorators/current-organization.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OrganizationGuard } from 'src/shared/guards/organization.guard';
+import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 
 @Controller('memberships')
 @UseGuards(JwtAuthGuard, OrganizationGuard)
@@ -21,13 +30,24 @@ export class MembershipsController {
     );
   }
 
+  @Post('confirmInvitation')
+  async confirmeInvitation(
+    @CurrentUser('userId') userId: string,
+    @Body() body: { organizationId: string },
+  ) {
+    return await this.membershipsService.confirmInvitation(
+      userId,
+      body.organizationId,
+    );
+  }
+
   @Get()
   findAll() {
     return this.membershipsService.findAll();
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
+  // @Patch('roleUpdate/:id')
+  // roleUpdate(@Param('id') id: string) {
   //   return this.membershipsService.findOne(+id);
   // }
 

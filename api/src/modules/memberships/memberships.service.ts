@@ -81,6 +81,7 @@ export class MembershipsService {
 
     const newMembership = await this.membershipRepo.create({
       data: {
+        status: 'INVITED',
         userId,
         role,
         organizationId,
@@ -88,6 +89,20 @@ export class MembershipsService {
     });
 
     return newMembership;
+  }
+
+  async confirmInvitation(userId: string, organizationId: string) {
+    await this.membershipRepo.update({
+      where: {
+        userId_organizationId: {
+          userId,
+          organizationId,
+        },
+      },
+      data: {
+        status: 'ACTIVE',
+      },
+    });
   }
 
   async changeRole(userId: string, organizationId: string, newRole: EnumRole) {

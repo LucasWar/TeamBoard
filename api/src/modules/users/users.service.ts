@@ -63,12 +63,15 @@ export class UsersService {
   }
 
   async getMyOrganizationsById(id: string) {
-    const user = await this.userRepo.findUnique({
+    const user = await this.userRepo.findFirst({
       where: {
         id,
       },
       select: {
         memberships: {
+          where: {
+            status: 'ACTIVE',
+          },
           select: {
             organizationId: true,
             role: true,

@@ -13,6 +13,7 @@ import { ProjectsModule } from './modules/projects/projects.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { RedisModule } from './modules/redis/redis.module';
     TasksModule,
     CommentsModule,
     RedisModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

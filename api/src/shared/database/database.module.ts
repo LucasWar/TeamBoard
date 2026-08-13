@@ -10,6 +10,7 @@ import { AuditLogRepository } from './repositories/audit-log.repository copy';
 import { TasksRepository } from './repositories/tasks.repository';
 import { ProjectsRepository } from './repositories/projects.repository';
 import { CommentsRepository } from './repositories/comments.repository';
+import { NotificationsRepository } from './repositories/notifications.repository';
 
 @Global()
 @Module({
@@ -25,6 +26,7 @@ import { CommentsRepository } from './repositories/comments.repository';
     TasksRepository,
     ProjectsRepository,
     CommentsRepository,
+    NotificationsRepository,
   ],
   exports: [
     UserRepository,
@@ -37,6 +39,7 @@ import { CommentsRepository } from './repositories/comments.repository';
     TasksRepository,
     ProjectsRepository,
     CommentsRepository,
+    NotificationsRepository,
   ],
 })
 export class DatabaseModule {}

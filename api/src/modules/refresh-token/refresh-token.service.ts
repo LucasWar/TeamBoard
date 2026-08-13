@@ -39,10 +39,10 @@ export class RefreshTokenService {
 
   async rotate(
     oldTokenId: string,
+    expiresAt: Date,
     createRefreshTokenDto: CreateRefreshTokenDto,
   ) {
     const { tokenHash, userId } = createRefreshTokenDto;
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     return this.transactionManager.transaction(async (tx) => {
       const newToken = await this.refreshTokenRepo.create(

@@ -36,13 +36,6 @@ export class OrganizationsController {
     return this.organizationsService.create(createOrganizationDto, user);
   }
 
-  // @Get()
-  // @Roles('USER')
-  // @UseGuards(OrganizationGuard, RolesGuard)
-  // findAll() {
-  //   return this.organizationsService.findAll();
-  // }
-
   @Get('summary')
   @UseGuards(OrganizationGuard)
   sumarryDashboard(
@@ -69,21 +62,6 @@ export class OrganizationsController {
   ) {
     return this.organizationsService.listMembers(orgId, userId);
   }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.organizationsService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // @Roles('ADMIN')
-  // 
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateOrganizationDto: UpdateOrganizationDto,
-  // ) {
-  //   return this.organizationsService.update(+id, updateOrganizationDto);
-  // }
 
   @Delete(':id')
   @UseGuards(OrganizationGuard, RolesGuard)

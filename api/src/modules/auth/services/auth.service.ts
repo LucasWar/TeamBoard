@@ -98,7 +98,43 @@ export class AuthService {
     return tokens;
   }
 
-  async generateTokens(userId: string, email: string) {
+  async refresh(refreshToken: string) {
+    try {
+      const hashToken = this.hashToken(refreshToken);
+
+      const tokenRegister = await this.refreshTokenService.findbyHash(hashToken);
+
+      if (!tokenRegister) {
+        throw new BadRequestException('Token invalido');
+      }
+
+      if (tokenRegister.revokedAt) {
+        throw new Error('Token ja revogado');
+      }
+
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(
+        refreshToken,
+        { secret: process.env.JWT_REFRESH_SECRET },
+      );
+
+      const tokens = await this.generateTokens(payload.sub, '');
+
+      await this.refreshTokenService.rotate(
+        tokenRegister.id,
+        tokenRegister.expiresAt,
+        {
+          tokenHash: this.hashToken(tokens.refreshToken),
+          userId: payload.sub,
+        },
+      );
+
+      return tokens;
+    } catch {
+      throw new UnauthorizedException('Refresh inválido');
+    }
+  }
+
+  private async generateTokens(userId: string, email: string) {
     const jti = randomUUID();
     const accessToken = await this.jwtService.signAsync(
       { sub: userId, email },
@@ -117,20 +153,5 @@ export class AuthService {
     );
 
     return { accessToken, refreshToken };
-  }
-
-  async refresh(refreshToken: string) {
-    try {
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(
-        refreshToken,
-        { secret: process.env.JWT_REFRESH_SECRET },
-      );
-
-      const tokens = await this.generateTokens(payload.sub, '');
-
-      return tokens;
-    } catch {
-      throw new UnauthorizedException('Refresh inválido');
-    }
   }
 }
