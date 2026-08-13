@@ -32,16 +32,16 @@ export function ProjectCard({describe, status, title, advance, onDelete, id, onE
         </div>
         <div className="flex gap-4 text-gray-400 shrink-0">
           <button onClick={() => onDelete(id)}>
-            <Trash2 className="w-6 h-6 hover:text-red-500 transition-colors" />
+            <Trash2 className="w-6 h-6 hover:text-red-500 transition-colors cursor-pointer" />
           </button>
           { status == enumStatusProject.ARCHIVED &&
             <button onClick={() => onArchiving(id, {status: 'ACTIVE'})}>
-              <FolderOpen className="w-6 h-6 hover:text-blue-500 transition-colors" />
+              <FolderOpen className="w-6 h-6 hover:text-blue-500 transition-colors cursor-pointer" />
             </button>
           }
           { status == enumStatusProject.ACTIVE && 
             <button onClick={() => onArchiving(id, {status: 'ARCHIVED'})}>
-              <FolderClosed className="w-6 h-6 hover:text-blue-500 transition-colors" />
+              <FolderClosed className="w-6 h-6 hover:text-blue-500 transition-colors cursor-pointer" />
             </button>
           }
           <button onClick={
@@ -49,7 +49,7 @@ export function ProjectCard({describe, status, title, advance, onDelete, id, onE
                 onEdit({description: describe, name: title, id: id})
               }
             }>
-            <ClipboardPen className="w-6 h-6 hover:text-yellow-500 transition-colors" />
+            <ClipboardPen className="w-6 h-6 hover:text-yellow-500 transition-colors cursor-pointer" />
           </button>
         </div>
       </header>

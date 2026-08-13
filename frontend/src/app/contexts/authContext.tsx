@@ -3,13 +3,16 @@ import { createContext, useCallback, useEffect, useState } from "react";
 import { usersService } from "../../services/userServices";
 import { localStorageKeys } from "../config/localStorageKeys";
 import type { User } from "../interfaces/user";
+import type { ListNotificationResponse } from "../../services/notificationsServices/listNotification";
+import { useNotifications } from "../hooks/useListNotifications";
 
 interface AuthContextValue {
   isFetchingAuth: boolean;
   signedIn: boolean;
   signin(accesseToken:string): void; 
   signout(): void;
-  user: User
+  user: User,
+  notifications: ListNotificationResponse[] | undefined
 }
 
 export const AuthContext = createContext({} as AuthContextValue);
@@ -22,6 +25,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
 
     return Boolean(storedAccessToken)
   });
+  
 
   const {isError, isFetching, isSuccess, data: me} = useQuery({
     queryKey: ['users','me'],
@@ -29,6 +33,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
     enabled: signedIn,
   })
 
+  const { data: notifications } = useNotifications(signedIn)
 
   const signin = useCallback((accesseToken: string) => {
     localStorage.setItem(localStorageKeys.ACCESS_TOKEN, accesseToken)
@@ -48,7 +53,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
   }, [isError, signout])
   
   return (
-    <AuthContext.Provider value={{ signedIn: isSuccess && signedIn, signin, signout, isFetchingAuth: isFetching, user: me! }}>
+    <AuthContext.Provider value={{ signedIn: isSuccess && signedIn, signin, signout, isFetchingAuth: isFetching, user: me!, notifications }}>
       {children}
     </AuthContext.Provider>
   );

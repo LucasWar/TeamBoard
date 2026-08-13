@@ -14,6 +14,7 @@ export function AuthGuard({ isPrivate, roles }:AuthGuardProps) {
   const { selectedOrganization, isOrgLoading, currentRole} = useOrganization()
 
   if (isFetchingAuth || isOrgLoading) {
+    console.log("Aqyu")
     return <PageLoader />; 
   }
   

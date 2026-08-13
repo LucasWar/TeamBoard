@@ -1,5 +1,5 @@
+import type { EditProject } from "../../../../app/interfaces/projetcs";
 import { Button } from "../../../../assets/components/Button";
-import type { EditProject } from "../../../../assets/interfaces/projetcs";
 import { Modal } from "../../../../components/Modal";
 import { useProjectModal } from "./useProjectModal";
 
@@ -30,7 +30,7 @@ export function ProjectModal({onClose, open, projectData, projectId}:CreateProje
             {errors?.description && <span className="text-primary-red">{errors?.description.message}</span>}
           </div>
         </div>
-        <Button type='submit' className="mt-3 w-full">
+        <Button type='submit' className="mt-3 w-full cursor-pointer">
           {isEditing ? "Salvar alterações" : "Cadastrar"}
         </Button>
       </form>

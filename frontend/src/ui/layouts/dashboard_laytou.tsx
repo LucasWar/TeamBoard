@@ -1,7 +1,6 @@
 import { Link, Outlet } from "react-router-dom";
 import { UserMenu } from "../../components/UserMenu";
 import { BookOpenIcon, Building, FolderKanbanIcon, UserIcon } from "lucide-react";
-import { Separator } from "radix-ui";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import { useOrganization } from "../../app/hooks/useOrganization";
 import { EnumRoles } from "../../app/enums/roles";
@@ -26,8 +25,8 @@ export function DashboardLayout(){
           <SearchIcon />
         </input>
       </header> */}
-      <div className="h-full flex">
-        <div className="bg-primary-bg w-60 h-full">
+      <div className="h-screen flex">
+        <div className="bg-primary-bg w-60 min-h-screen">
           <div className="mt-4 ml-2">
             <UserMenu />
           </div>
@@ -66,9 +65,11 @@ export function DashboardLayout(){
               </div>
             </Link>
           </nav>
-          {/* <Separator.Root className="mt-2 bg-red-600 data-[orientation=horizontal]:h-px " /> */}
+          {/* <Separator.Root className="mt-2 data-[orientation=horizontal]:h-px " /> */}
         </div>
-        <Outlet />  
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />  
+        </main>
       </div>
     </div>
   )

@@ -34,7 +34,7 @@ export function Modal({open, onClose, children, title, rightAction}: ModalProps)
         >
           <Dialog.Title className="h-12 flex items-center justify-between text-gray-800">
             <button className="w-12 h-12 flex items-center justify-center outline-none">
-              <Cross2Icon className="w-6 h-6" onClick={onClose}/>
+              <Cross2Icon className="w-6 h-6 cursor-pointer" onClick={onClose}/>
             </button>
             <span className="text-lg tracking-[-1px]">{title}</span>
             <div className="w-12 h-12 flex items-center justify-center">{rightAction}</div>

@@ -22,7 +22,7 @@ export function KanbanColumn({id, tasks, title, handleEdit, handleDelete}: Kanba
   });
 
   return (
-    <div ref={setNodeRef} className="w-80 flex-shrink-0 bg-gray-100/50 rounded-lg p-4">
+    <div ref={setNodeRef} className="w-95 shrink-0 bg-gray-100/50 rounded-lg">
       
       {/* Título da Coluna */}
       <div className="flex justify-between items-center mb-4" >

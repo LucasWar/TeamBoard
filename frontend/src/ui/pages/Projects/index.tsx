@@ -33,7 +33,7 @@ export function ProjectsDashboard(){
 
   
   return (
-    <div className="flex-1 p-8 bg-gray-50 min-h-screen relative">
+    <div className="flex-1 px-8 bg-gray-50 min-h-screen relative">
       <ProjectModal 
         open={openModal}
         onClose={handleCloseModal}
@@ -87,19 +87,15 @@ export function ProjectsDashboard(){
         </div>
 
         <div className="hidden gap-5 lg:flex">
-          {/* <div className="flex gap-3 px-4 items-center bg-white border-2 border-gray-200 ">
-            <button className={cn(visualizationProjects == 'GRID' && 'text-gray-500')} onClick={() => handleChangeVisualizationProjects("GRID")}>Grid</button>
-            <button className={cn(visualizationProjects == 'LIST' && 'text-gray-500')} onClick={() => handleChangeVisualizationProjects("LIST")}>List</button>
-          </div> */}
           {
             (currentRole == EnumRoles.MANAGER || currentRole == EnumRoles.ADMIN) &&
-            <button className="bg-blue-600 px-2 text-white rounded-md" onClick={() => handleCreateProject()}>Novo projeto</button>
+            <button className="bg-blue-600 px-2 text-white rounded-md cursor-pointer" onClick={() => handleCreateProject()}>Novo projeto</button>
           }
         </div>
       </div>
-      <div className="w-full overflow-x-auto">
+      <div className="w-full overflow-x-auto pt-5">
         {projectsData && 
-          <div className="w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 p-5">
+          <div className="w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               { projectsData.map((project) => (
                   <ProjectCard 
                     key={project.id}
@@ -126,7 +122,7 @@ export function ProjectsDashboard(){
         }
       {
         (currentRole == EnumRoles.MANAGER || currentRole == EnumRoles.ADMIN) &&
-        <button className="flex fixed bottom-3 right-3 bg-blue-600 p-3 rounded-full text-white lg:hidden" onClick={() => handleCreateProject()}>
+        <button className="flex fixed bottom-3 right-3 bg-blue-600 p-3 rounded-full text-white lg:hidden cursor-pointer" onClick={() => handleCreateProject()}>
           <Plus />
         </button>
       }

@@ -32,18 +32,26 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      originalRequest.url !== "/auth/refresh"
+    ) {
       originalRequest._retry = true;
 
       try {
         const res = await api.get("/auth/refresh");
         const newToken = res.data.accessToken;
 
-        localStorage.setItem(localStorageKeys.ACCESS_TOKEN, newToken);
+        localStorage.setItem(
+          localStorageKeys.ACCESS_TOKEN,
+          newToken
+        );
 
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
+
         return api(originalRequest);
-      } catch {  
+      } catch {
         localStorage.removeItem(localStorageKeys.ACCESS_TOKEN);
         window.location.href = "/login";
       }
