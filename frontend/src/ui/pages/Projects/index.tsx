@@ -50,47 +50,47 @@ export function ProjectsDashboard(){
         onClose={handleCloseDeleteModal}
         onConfirm={confirmDelete}
       />
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Meus Projetos</h1>
-        <p className="text-sm text-gray-500 mt-1">Gestão centralizada de todos os seus projetos.</p>
-      </header>
-      <div className="ml-4 mt-4 flex justify-between">
-        <div className="flex items-center gap-2 pl-2 bg-white border border-gray-300">
-          <span>Status</span>
-          <Select.Root 
-            defaultValue="all"
-            onValueChange={(value: enumStatusProject | "all") => {
-              handleSelectFilters({status: value === "all" ? undefined : value})
-            }}
-          >
-            <Select.Trigger>
-              <Select.Value />
-            </Select.Trigger>
+      <div className="ml-4 mt-4 flex items-center justify-between">
+        <div className="relative bg-white w-1/2 lg:w-1/4 shrink-0">
+          <div className="absolute">
+            <Select.Root
+              defaultValue="all"
+              onValueChange={(value: enumStatusProject | "all") => {
+                handleSelectFilters({
+                  status: value === "all" ? undefined : value,
+                })
+              }}
+            >
+              <Select.Trigger>
+                <Select.Value />
+              </Select.Trigger>
 
-            <Select.Content onChange=''>
-              <Select.Item value="all">Todos</Select.Item>
-              <Select.Item value="ACTIVE">Ativo</Select.Item>
-              <Select.Item value="ARCHIVED">Arquivado</Select.Item>
-            </Select.Content>
-          </Select.Root>
-        </div>
-
-        <div className="relative bg-white border-2 border-gray-200 w-1/2 lg:w-1/4 ">
-          <SearchIcon className="w-4 h-4 absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
+              <Select.Content>
+                <Select.Item value="all">Todos</Select.Item>
+                <Select.Item value="ACTIVE">Ativo</Select.Item>
+                <Select.Item value="ARCHIVED">Arquivado</Select.Item>
+              </Select.Content>
+            </Select.Root>
+          </div>
 
           <input
-            className="border pl-8 pr-2 text-lg w-full h-full"
+            className="border-none pl-23 pr-2 text-lg w-full h-8"
             placeholder="Pesquisar"
             value={searchTerm}
             onChange={(e) => handleChangeSearchTerm(e.target.value)}
           />
         </div>
 
-        <div className="hidden gap-5 lg:flex">
-          {
-            (currentRole == EnumRoles.MANAGER || currentRole == EnumRoles.ADMIN) &&
-            <button className="bg-blue-600 px-2 text-white rounded-md cursor-pointer" onClick={() => handleCreateProject()}>Novo projeto</button>
-          }
+        <div className="hidden gap-5 lg:flex shrink-0">
+          {(currentRole == EnumRoles.MANAGER ||
+            currentRole == EnumRoles.ADMIN) && (
+            <button
+              className="bg-blue-600 px-4 py-2 text-white rounded-md cursor-pointer"
+              onClick={() => handleCreateProject()}
+            >
+              Novo projeto
+            </button>
+          )}
         </div>
       </div>
       <div className="w-full overflow-x-auto pt-5">

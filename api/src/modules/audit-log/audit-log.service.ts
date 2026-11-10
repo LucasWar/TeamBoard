@@ -50,4 +50,13 @@ export class AuditLogService {
 
     return recentLogs;
   }
+  async findByID(logId: string) {
+    const logs = await this.auditLogRepo.findUnique({
+      where: {
+        id: logId,
+      },
+    });
+
+    return logs;
+  }
 }

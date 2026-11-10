@@ -12,7 +12,7 @@ function SelectTrigger({ children, className }: any) {
   return (
     <RdxSelect.Trigger
       className={cn(
-        "h-10 w-35 px-4 bg-white text-sm flex items-center justify-between gap-2",
+        "h-8 w-20 bg-white text-sm flex items-center justify-between gap-1 pl-2",
         "hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200",
         className
       )}

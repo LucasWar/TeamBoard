@@ -6,6 +6,7 @@ import {
   Get,
   Patch,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { MembershipsService } from './memberships.service';
 import { AddMembershipDTO } from './dto/add-membership.dto';
@@ -13,6 +14,7 @@ import { CurrentOrg } from 'src/shared/decorators/current-organization.decorator
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OrganizationGuard } from 'src/shared/guards/organization.guard';
 import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
+import { Roles } from 'src/shared/decorators/role.decorator';
 
 @Controller('memberships')
 @UseGuards(JwtAuthGuard, OrganizationGuard)
@@ -28,6 +30,15 @@ export class MembershipsController {
       addMembershipDto,
       organizationId,
     );
+  }
+
+  @Delete('removeMembership/:userId')
+  @Roles('ADMIN')
+  removeMember(
+    @Param('userId') userId: string,
+    @CurrentOrg() organizationId: string,
+  ) {
+    return this.membershipsService.removeMember(userId, organizationId);
   }
 
   @Post('confirmInvitation')

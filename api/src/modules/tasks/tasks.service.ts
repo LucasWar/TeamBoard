@@ -8,6 +8,7 @@ import { EnumStatusTask, Prisma } from '@prisma/client';
 import { TransactionManager } from 'src/shared/database/transaction.manager';
 import { ReorderTaskDto } from './dto/reorder-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class TasksService {
@@ -17,6 +18,7 @@ export class TasksService {
     private readonly membershipService: MembershipsService,
     private readonly auditLogService: AuditLogService,
     private readonly transactionManager: TransactionManager,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(
@@ -60,6 +62,13 @@ export class TasksService {
         projectId,
         position: nextPosition,
       },
+      omit: {
+        assigneeId: true,
+        completedAt: true,
+        createdAt: true,
+        deletedAt: true,
+        updatedAt: true,
+      },
     });
 
     void this.auditLogService.logAction({
@@ -70,6 +79,8 @@ export class TasksService {
       entityType: 'Task',
       metadata: { title: newTask.title },
     });
+
+    this.eventEmitter.emit('task.created', newTask);
 
     return newTask;
   }
@@ -91,6 +102,8 @@ export class TasksService {
         id,
       },
     });
+
+    this.eventEmitter.emit('task.deleted', task.projectId, id);
   }
 
   async updateTask(
@@ -129,7 +142,7 @@ export class TasksService {
       throw new NotFoundException('Você não pertence a essa organização');
     }
 
-    await this.taskRepo.update({
+    const newTask = await this.taskRepo.update({
       where: {
         id: taskId,
       },
@@ -138,6 +151,8 @@ export class TasksService {
         assigneeId: assigned,
       },
     });
+
+    this.eventEmitter.emit('task.updated', newTask);
   }
 
   async assignTask(
@@ -202,10 +217,10 @@ export class TasksService {
   }
 
   async myTasks(userId: string, orgId: string) {
-    const today = new Date();
-
-    // remove horas/minutos/segundos
-    today.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const today = new Date(
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
+    );
 
     const result = await this.taskRepo.findMany({
       where: {
@@ -235,30 +250,21 @@ export class TasksService {
     };
 
     for (const task of result) {
-      // tarefas sem data
       if (!task.dueDate) {
         grouped.upcoming.push(task);
         continue;
       }
 
-      const dueDate = new Date(task.dueDate);
-
-      // normaliza data
-      dueDate.setHours(0, 0, 0, 0);
-
-      // atrasadas
-      if (dueDate < today) {
+      if (task.dueDate < today) {
         grouped.late.push(task);
         continue;
       }
 
-      // hoje
-      if (dueDate.getTime() === today.getTime()) {
+      if (task.dueDate.getTime() === today.getTime()) {
         grouped.today.push(task);
         continue;
       }
 
-      // futuras
       grouped.upcoming.push(task);
     }
 
@@ -266,13 +272,14 @@ export class TasksService {
   }
 
   async myKpis(userId: string, orgId: string) {
-    const today = new Date();
+    const now = new Date();
 
-    const todayLocal = today.toLocaleDateString('sv-SE');
+    const todayUTC = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+    );
 
-    const lastSevenDays = new Date();
-    lastSevenDays.setDate(today.getDate() - 7);
-    lastSevenDays.setHours(0, 0, 0, 0);
+    const lastSevenDays = new Date(todayUTC);
+    lastSevenDays.setUTCDate(lastSevenDays.getUTCDate() - 7);
 
     const result = await this.taskRepo.findMany({
       where: {
@@ -280,7 +287,7 @@ export class TasksService {
         organizationId: orgId,
         assigneeId: userId,
         dueDate: {
-          lte: today,
+          lte: now,
         },
         project: {
           status: 'ACTIVE',
@@ -295,21 +302,18 @@ export class TasksService {
         assigneeId: userId,
         completedAt: {
           gte: lastSevenDays,
-          lte: today,
+          lte: now,
         },
       },
     });
 
     const contagem = result.reduce(
       (acc, { dueDate }) => {
-        const dataTarefaLocal = new Date(dueDate!).toLocaleDateString('sv-SE');
-
-        if (dataTarefaLocal === todayLocal) {
+        if (dueDate!.getTime() === todayUTC.getTime()) {
           acc.forToday++;
         } else {
           acc.late++;
         }
-
         return acc;
       },
       { forToday: 0, late: 0 },
@@ -340,52 +344,191 @@ export class TasksService {
   async reorderTask(taskId: string, dto: ReorderTaskDto, orgId: string) {
     const task = await this.verifyTaskOwnership(taskId, orgId);
 
-    return this.transactionManager.transaction(async (tx) => {
-      await this.taskRepo.updateMany({
+    const result = await this.transactionManager.transaction(async (tx) => {
+      const currentTask = await tx.task.findUniqueOrThrow({
+        where: { id: taskId },
+      });
+
+      const oldStatus = currentTask.status;
+      const oldPosition = currentTask.position!;
+      const newStatus = dto.newStatus;
+
+      const taskCountInNewStatus = await tx.task.count({
         where: {
           projectId: task.projectId,
-          status: dto.newStatus,
-          position: { gte: dto.newPosition },
+          status: newStatus,
           id: { not: taskId },
-        },
-        data: {
-          position: { increment: 1 },
         },
       });
 
-      if (dto.oldStatus && dto.oldStatus != dto.newStatus) {
-        await this.taskRepo.updateMany({
+      const maxPosition =
+        oldStatus === newStatus ? taskCountInNewStatus : taskCountInNewStatus;
+
+      const newPosition = Math.max(0, Math.min(dto.newPosition, maxPosition));
+
+      if (oldStatus === newStatus) {
+        if (newPosition < oldPosition) {
+          // Moveu para cima
+          await tx.task.updateMany({
+            where: {
+              projectId: task.projectId,
+              status: newStatus,
+              position: {
+                gte: newPosition,
+                lt: oldPosition,
+              },
+              id: {
+                not: taskId,
+              },
+            },
+            data: {
+              position: {
+                increment: 1,
+              },
+            },
+          });
+        } else if (newPosition > oldPosition) {
+          // Moveu para baixo
+          await tx.task.updateMany({
+            where: {
+              projectId: task.projectId,
+              status: newStatus,
+              position: {
+                gt: oldPosition,
+                lte: newPosition,
+              },
+              id: {
+                not: taskId,
+              },
+            },
+            data: {
+              position: {
+                decrement: 1,
+              },
+            },
+          });
+        }
+        // newPosition === oldPosition: nada a fazer
+      } else {
+        /**
+         * =========================================================
+         * 2. TROCOU DE COLUNA
+         * =========================================================
+         */
+        await tx.task.updateMany({
           where: {
             projectId: task.projectId,
-            status: dto.oldStatus,
-            position: { gt: dto.newPosition },
-            id: { not: taskId },
+            status: oldStatus,
+            position: {
+              gt: oldPosition,
+            },
+            id: {
+              not: taskId,
+            },
           },
           data: {
-            position: { decrement: 1 },
+            position: {
+              decrement: 1,
+            },
+          },
+        });
+
+        await tx.task.updateMany({
+          where: {
+            projectId: task.projectId,
+            status: newStatus,
+            position: {
+              gte: newPosition,
+            },
+            id: {
+              not: taskId,
+            },
+          },
+          data: {
+            position: {
+              increment: 1,
+            },
           },
         });
       }
 
       const data: Prisma.TaskUncheckedUpdateInput = {
-        status: dto.newStatus,
-        position: dto.newPosition,
+        status: newStatus,
+        position: newPosition,
       };
 
       if (
-        dto.newStatus === EnumStatusTask.DONE &&
-        dto.newStatus != dto.oldStatus
+        newStatus === EnumStatusTask.DONE &&
+        oldStatus !== EnumStatusTask.DONE
       ) {
         data.completedAt = new Date();
-      } else {
+      } else if (
+        newStatus !== EnumStatusTask.DONE &&
+        oldStatus === EnumStatusTask.DONE
+      ) {
         data.completedAt = null;
       }
 
-      return this.taskRepo.update({
-        where: { id: taskId },
+      return tx.task.update({
+        where: {
+          id: taskId,
+        },
         data,
+        include: {
+          assignee: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+              email: true,
+            },
+          },
+        },
       });
     });
+
+    const affectedTasks = await this.taskRepo.findMany({
+      where: {
+        projectId: task.projectId,
+        status: {
+          in:
+            dto.oldStatus === result.status
+              ? [result.status]
+              : [dto.oldStatus, result.status],
+        },
+      },
+      orderBy: [
+        {
+          status: 'asc',
+        },
+        {
+          position: 'asc',
+        },
+      ],
+      include: {
+        assignee: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    /**
+     * =========================================================
+     * 5. EMITE EVENTO PARA OS OUTROS CLIENTES
+     * =========================================================
+     */
+    this.eventEmitter.emit('tasks.reordered', {
+      projectId: task.projectId,
+      movedTask: result,
+      tasks: affectedTasks,
+    });
+
+    return result;
   }
 
   async changeStatus(

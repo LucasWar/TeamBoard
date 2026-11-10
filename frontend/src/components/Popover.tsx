@@ -40,7 +40,7 @@ function PopoverContent({children, className, isAlign}: PopoverContentProps) {
       <RdxPopover.Content 
         align={isAlign}
         className={cn(
-          "rounded-2xl p-2  bg-white space-y-2 shadow-[0_11px_20px_0_rgba(0,0,0,0.10)] z-50",  
+          "rounded-2xl pt-2 bg-white space-y-2 shadow-[0_11px_20px_0_rgba(0,0,0,0.10)] z-50",  
           "data-[side=bottom]:animate-slide-up-fade",
           "data-[side=top]:animate-slide-down-fade",
           className

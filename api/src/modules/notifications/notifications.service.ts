@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { NotificationsRepository } from 'src/shared/database/repositories/notifications.repository';
 import { UsersService } from '../users/users.service';
@@ -23,7 +23,7 @@ export class NotificationsService {
       throw new NotFoundException('Usuário não encontado');
     }
 
-    const sendMenssage = `Caro(a) ${user.name}, foi lhe enviado um convite para participar da organização: ${organizationName} como ${role}`;
+    const sendMenssage = `Caro(a) ${user.name}, foi lhe enviado um convite para participar da organização: ${organizationName}.`;
 
     await this.notificationRepo.create({
       data: {
@@ -33,6 +33,45 @@ export class NotificationsService {
         user: {
           connect: user,
         },
+      },
+    });
+  }
+
+  async deleteNotification(id: string) {
+    const notificationExist = await this.notificationRepo.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!notificationExist) {
+      throw new BadRequestException('Notificação não encontrada');
+    }
+
+    await this.notificationRepo.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async updateStatusRead(id: string) {
+    const notificationExist = await this.notificationRepo.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!notificationExist) {
+      throw new BadRequestException('Notificação não encontrada');
+    }
+
+    await this.notificationRepo.update({
+      where: {
+        id,
+      },
+      data: {
+        read: true,
       },
     });
   }

@@ -10,6 +10,10 @@ export class MembershipsRepository {
     return this.prismaService.membership.create(createDto);
   }
 
+  delete(deleteDto: Prisma.MembershipDeleteArgs) {
+    return this.prismaService.membership.delete(deleteDto);
+  }
+
   findUnique(findDto: Prisma.MembershipFindUniqueArgs) {
     return this.prismaService.membership.findUnique(findDto);
   }

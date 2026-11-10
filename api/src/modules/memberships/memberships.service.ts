@@ -156,21 +156,32 @@ export class MembershipsService {
       }
     }
 
-    return this.membershipRepo.update({
+    // return this.membershipRepo.update({
+    //   where: {
+    //     userId_organizationId: {
+    //       userId,
+    //       organizationId,
+    //     },
+    //   },
+    //   data: {
+    //     status: EnumStatus.INVITED,
+    //     deletedAt: new Date(),
+    //   },
+    // });
+    return await this.membershipRepo.delete({
       where: {
         userId_organizationId: {
           userId,
           organizationId,
         },
       },
-      data: {
-        status: EnumStatus.SUSPENDED,
-        deletedAt: new Date(),
-      },
     });
   }
 
-  async verifyUserInOrg(userId: string, organizationId: string) {
+  async verifyUserInOrg(
+    userId: string,
+    organizationId: string,
+  ): Promise<boolean> {
     const membership = await this.membershipRepo.findUnique({
       where: {
         userId_organizationId: {
@@ -184,6 +195,7 @@ export class MembershipsService {
         'O usuário atribuído não pertence a esta organização.',
       );
     }
+    return true;
   }
 
   async verifyUserInOrgByEmail(email: string, organizationId: string) {

@@ -8,7 +8,7 @@ import { ImageInput } from "../../../components/imageInput";
 
 
 export function Register() {
-  const { handleSubmit, register, control } = useRegisterController()
+  const { handleSubmit, register, control, errors } = useRegisterController()
 
   return (
     <div className="w-1/2">
@@ -39,9 +39,9 @@ export function Register() {
             )}
           />
         </div>
-        <Input type="text" placeholder="Nome" {...register('name')} />
-        <Input type="email" placeholder="E-email" {...register('email')} />
-        <Input type="password" placeholder="Senha"  {...register('password')} />
+        <Input type="text" placeholder="Nome" {...register('name')} error={errors.name?.message}/>
+        <Input type="email" placeholder="E-email" {...register('email')} error={errors.email?.message}/>
+        <Input type="password" placeholder="Senha"  {...register('password')} error={errors.password?.message}/>
         <Button type="submit" className="mt-2">
           Criar contar
         </Button>

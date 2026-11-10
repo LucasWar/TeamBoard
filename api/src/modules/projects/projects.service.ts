@@ -25,12 +25,11 @@ export class ProjectsService {
   ) {}
 
   async create(dto: CreateProjectDto, orgId: string, userId: string) {
-    const existingProject = await this.projectRepo.findUnique({
+    const existingProject = await this.projectRepo.findFirst({
       where: {
-        organizationId_name: {
-          organizationId: orgId,
-          name: dto.name,
-        },
+        AND: [
+          { organizationId: orgId, name: dto.name, NOT: { status: 'DELETE' } },
+        ],
       },
     });
 

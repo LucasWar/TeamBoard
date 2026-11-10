@@ -46,13 +46,6 @@ export function MyOrganizations() {
         onClose={handleCloseOrganizationDeleteModal}
       /> 
       <div className="p-8">
-        <header className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold">Minhas Organizações</h1>
-            <p className="text-gray-500">Gerencie seus espaços de trabalho</p>
-          </div>
-        </header>
-
         <div className='flex justify-between mb-2'>
           <div className="relative bg-white border-2 border-gray-200 w-1/2 lg:w-1/4 ">
             <SearchIcon className="w-4 h-4 absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />

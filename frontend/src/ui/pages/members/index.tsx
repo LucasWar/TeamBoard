@@ -5,9 +5,11 @@ import { roleMap } from '../../../app/utils/roleMap';
 import { cn } from '../../../app/utils/cn';
 import { Spinner } from '../../../assets/components/Spinner';
 import { Plus } from 'lucide-react';
+import { RemoveMemberModal } from './removeMeber';
 
 export function Members() {
-  const { data: members, handleOpenModal, handleCloseModal, openModal, isPending } = useControllerMembers()
+  const { data: members, handleOpenModal, handleCloseModal, openModal, isPending, confirmRemove, handleCloseRemoveMemberModal, handleOpenRemoveMemberModal, openRemoveMemberModal } = useControllerMembers()
+
   const { currentRole } = useOrganization()
 
   const canManageMembers = currentRole === 'ADMIN' || currentRole === 'MANAGER';
@@ -23,13 +25,15 @@ export function Members() {
         onClose={handleCloseModal}
         open={openModal}
       />
+      
+      <RemoveMemberModal 
+        onClose={handleCloseRemoveMemberModal} 
+        onConfirm={confirmRemove}
+        open={openRemoveMemberModal}
+
+      />
       {/* CABEÇALHO */}
-      <header className="flex justify-between items-end mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Membros da Equipe</h1>
-          <p className="text-sm text-gray-500 mt-1">Gerencie os acessos e permissões da sua organização.</p>
-        </div>
-        
+      <header className="flex justify-between items-end mb-8">        
         {/* RBAC NA PRÁTICA: O botão só existe se o usuário tiver permissão */}
         {canManageMembers && (
           <button className="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors shadow-sm lg:flex" onClick={() => handleOpenModal()}>
@@ -96,7 +100,7 @@ export function Members() {
 
                       <td className="px-6 py-4 text-right">
                         {canManageMembers && (
-                          <button className="text-gray-400 hover:text-blue-600 font-medium text-sm transition-colors">
+                          <button className="text-gray-400 hover:text-blue-600 font-medium text-sm transition-colors" onClick={() => handleOpenRemoveMemberModal(member.id)}>
                             Remover
                           </button>
                         )}

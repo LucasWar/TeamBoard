@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRefreshTokenDto } from '../../shared/dto/create-refresh-token.dto';
-//import { UpdateRefreshTokenDto } from './dto/update-refresh-token.dto';
 import { RefreshTokenRepository } from 'src/shared/database/repositories/refresh-token.repository';
 import { TransactionManager } from 'src/shared/database/transaction.manager';
 
@@ -30,40 +29,32 @@ export class RefreshTokenService {
     });
   }
 
-  async revoke(id: string) {
-    return this.refreshTokenRepo.update({
-      where: { id },
+  async revoke(tokenHash: string) {
+    const token = await this.refreshTokenRepo.findFirst({
+      where: {
+        tokenHash,
+      },
+    });
+
+    if (!token) {
+      throw new NotFoundException('Token não encontrado');
+    }
+
+    await this.refreshTokenRepo.update({
+      where: { id: token.id },
       data: { revokedAt: new Date() },
     });
   }
 
-  async rotate(
-    oldTokenId: string,
-    expiresAt: Date,
-    createRefreshTokenDto: CreateRefreshTokenDto,
-  ) {
-    const { tokenHash, userId } = createRefreshTokenDto;
-
-    return this.transactionManager.transaction(async (tx) => {
-      const newToken = await this.refreshTokenRepo.create(
-        {
-          data: { tokenHash, userId, expiresAt },
-        },
-        tx,
-      );
-
-      await this.refreshTokenRepo.update(
-        {
-          where: { id: oldTokenId },
-          data: {
-            revokedAt: new Date(),
-            replacedByTokenId: newToken.id,
-          },
-        },
-        tx,
-      );
-
-      return newToken;
+  async rotate(tokenHash: string, newHashToken: string) {
+    await this.refreshTokenRepo.update({
+      where: {
+        tokenHash,
+      },
+      data: {
+        tokenHash: newHashToken,
+        lastUsedAt: new Date(),
+      },
     });
   }
 }

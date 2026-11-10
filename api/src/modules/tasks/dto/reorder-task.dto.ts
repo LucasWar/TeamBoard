@@ -1,5 +1,5 @@
+import { IsEnum, IsInt, IsNotEmpty, Min } from 'class-validator';
 import { EnumStatusTask } from '@prisma/client';
-import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class ReorderTaskDto {
   @IsEnum(EnumStatusTask)
@@ -7,9 +7,11 @@ export class ReorderTaskDto {
   newStatus!: EnumStatusTask;
 
   @IsEnum(EnumStatusTask)
-  @IsOptional()
-  oldStatus?: EnumStatusTask;
+  @IsNotEmpty()
+  oldStatus!: EnumStatusTask;
 
+  @IsInt()
+  @Min(0)
   @IsNotEmpty()
   newPosition!: number;
 }

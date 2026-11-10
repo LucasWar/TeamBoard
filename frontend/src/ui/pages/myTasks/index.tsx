@@ -6,10 +6,6 @@ export function MyTasks() {
 
   return (
     <div className="flex-1 p-8">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Minhas Tarefas</h1>
-        <p className="text-sm text-gray-500 mt-1">Gestão centralizada de todas as tuas responsabilidades.</p>
-      </header>
 
       <div className="w-full space-y-8">
         

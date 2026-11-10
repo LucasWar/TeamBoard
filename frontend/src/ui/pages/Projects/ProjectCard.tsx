@@ -3,9 +3,9 @@ import { enumStatusProject } from "../../../app/enums/statusProject";
 import { statusMap } from "../../../app/utils/statusMap";
 import { cn } from "../../../lib/utils";
 import { Trash2, FolderClosed, ClipboardPen, FolderOpen } from "lucide-react";
-import type { EditProject } from "../../../assets/interfaces/projetcs";
 import type { ChangeStatusProjectParams } from "../../../services/projectsServices/archiveProject";
 import { Link } from "react-router-dom";
+import type { EditProject } from "../../../app/interfaces/projetcs";
 
 interface ProjectCardProps{
   title: string,

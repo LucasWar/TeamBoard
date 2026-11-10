@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { LoginDto } from '../dto/login.dto';
@@ -99,39 +100,54 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string) {
-    try {
-      const hashToken = this.hashToken(refreshToken);
+    const payload = await this.jwtService.verifyAsync<JwtPayload>(
+      refreshToken,
+      { secret: process.env.JWT_REFRESH_SECRET },
+    );
 
-      const tokenRegister = await this.refreshTokenService.findbyHash(hashToken);
-
-      if (!tokenRegister) {
-        throw new BadRequestException('Token invalido');
-      }
-
-      if (tokenRegister.revokedAt) {
-        throw new Error('Token ja revogado');
-      }
-
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(
-        refreshToken,
-        { secret: process.env.JWT_REFRESH_SECRET },
-      );
-
-      const tokens = await this.generateTokens(payload.sub, '');
-
-      await this.refreshTokenService.rotate(
-        tokenRegister.id,
-        tokenRegister.expiresAt,
-        {
-          tokenHash: this.hashToken(tokens.refreshToken),
-          userId: payload.sub,
-        },
-      );
-
-      return tokens;
-    } catch {
-      throw new UnauthorizedException('Refresh inválido');
+    if (!payload) {
+      throw new UnauthorizedException('Refresh token invalido');
     }
+
+    const hashToken = this.hashToken(refreshToken);
+
+    const tokenRegister = await this.refreshTokenService.findbyHash(hashToken);
+
+    if (!tokenRegister) {
+      await this.auditLogService.logAction({
+        action: 'REFRESH_TOKEN',
+        metadata: {
+          error: 'INVALID_TOKEN',
+          refresh_token: refreshToken,
+          hashToken,
+          payload,
+        },
+      });
+      throw new BadRequestException('Token invalido');
+    }
+
+    if (tokenRegister.revokedAt) {
+      throw new Error('Token ja revogado');
+    }
+
+    const tokens = await this.generateTokens(payload.sub, '');
+
+    await this.refreshTokenService.rotate(
+      hashToken,
+      this.hashToken(tokens.refreshToken),
+    );
+
+    return tokens;
+  }
+
+  async rovokedToken(token: string | undefined) {
+    if (!token) {
+      throw new NotFoundException('Token não enviado');
+    }
+
+    const hashToken = this.hashToken(token);
+
+    await this.refreshTokenService.revoke(hashToken);
   }
 
   private async generateTokens(userId: string, email: string) {

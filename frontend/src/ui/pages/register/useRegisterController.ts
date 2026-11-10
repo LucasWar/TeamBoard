@@ -5,6 +5,7 @@ import { z } from "zod";
 import { authService } from "../../../services/authServices";
 import { useAuth } from "../../../app/hooks/useAuth";
 import type { RegisterParams } from "../../../services/authServices/register";
+import toast from "react-hot-toast";
 
 export function useRegisterController() {
   const schema = z.object({
@@ -35,7 +36,7 @@ export function useRegisterController() {
       signin(accessToken)
     }
     catch(error) {
-      console.log(error)
+      toast.error(error.response.data.message)
     }
   })
 

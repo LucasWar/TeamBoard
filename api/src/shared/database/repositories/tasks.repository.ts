@@ -6,7 +6,9 @@ import { type Prisma } from '@prisma/client';
 export class TasksRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  create(createDto: Prisma.TaskCreateArgs) {
+  create<T extends Prisma.TaskCreateArgs>(
+    createDto: Prisma.SelectSubset<T, Prisma.TaskCreateArgs>,
+  ) {
     return this.prismaService.task.create(createDto);
   }
 

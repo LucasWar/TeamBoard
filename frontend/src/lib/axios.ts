@@ -27,6 +27,8 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+let refreshPromise: Promise<string> | null = null;
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -40,16 +42,20 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const res = await api.get("/auth/refresh");
-        const newToken = res.data.accessToken;
+        if (!refreshPromise) {
+          refreshPromise = api.get("/auth/refresh")
+            .then((res) => {
+              const newToken = res.data.accessToken;
+              localStorage.setItem(localStorageKeys.ACCESS_TOKEN, newToken);
+              return newToken;
+            })
+            .finally(() => {
+              refreshPromise = null;
+            });
+        }
 
-        localStorage.setItem(
-          localStorageKeys.ACCESS_TOKEN,
-          newToken
-        );
-
+        const newToken = await refreshPromise;
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
         return api(originalRequest);
       } catch {
         localStorage.removeItem(localStorageKeys.ACCESS_TOKEN);

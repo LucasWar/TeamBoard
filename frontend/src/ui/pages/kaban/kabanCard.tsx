@@ -44,7 +44,7 @@ export function KanbanCard({ task, isOverlay, onEdit, onDelete }: KanbanCardProp
       <div 
         ref={setNodeRef} 
         style={style} 
-        className="bg-gray-100 border-2 border-dashed border-gray-300 p-4 rounded h-[120px] opacity-50"
+        className="bg-linear-to-br from-blue-50 to-blue-100 border-2 border-dashed border-blue-400 p-4 rounded h-30 opacity-60 transition-all duration-200"
       />
     );
   }
@@ -56,13 +56,13 @@ export function KanbanCard({ task, isOverlay, onEdit, onDelete }: KanbanCardProp
       style={style}    
       {...attributes}  
       {...listeners}   
-      className={`bg-white p-4 rounded border shadow-sm ${isDragging ? 'opacity-50 cursor-grabbing' : 'cursor-grab'}`}
+      className={`bg-white p-4 rounded border shadow-sm transition-all duration-200 hover:shadow-md ${isDragging ? 'opacity-50 cursor-grabbing shadow-lg' : 'cursor-grab'}`}
     >
       <div className="flex justify-between items-center">
-        <h4 className="text-sm font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
+        <h4 className="text-sm font-bold text-gray-800 mb-2 transition-colors">
           {task.title}
         </h4>
-        <div className="cursor-pointer"
+        <div className="cursor-pointer hover:text-red-500 transition-colors"
           onClick={(e) => {
             e.stopPropagation()
             e.preventDefault()
@@ -75,7 +75,7 @@ export function KanbanCard({ task, isOverlay, onEdit, onDelete }: KanbanCardProp
       </div>
       <div className="flex items-center justify-between mt-4">
         <div className="flex flex-col gap-2">
-          <span className={cn(`text-[10px] font-bold px-2 py-0.5 rounded w-max uppercase}`,priorityMap[task.priority].classNameStatus)}>
+          <span className={cn(`text-[10px] font-bold px-2 py-0.5 rounded w-max uppercase`, priorityMap[task.priority].classNameStatus)}>
             {priorityMap[task.priority].label}
           </span>
           {task.dueDate &&

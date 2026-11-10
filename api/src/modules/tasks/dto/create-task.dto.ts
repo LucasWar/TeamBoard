@@ -1,4 +1,4 @@
-import { EnumPriority, EnumStatusTask } from '@prisma/client';
+import { EnumPriority } from '@prisma/client';
 import {
   IsDateString,
   IsEmail,

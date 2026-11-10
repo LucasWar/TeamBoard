@@ -2,6 +2,7 @@ import { addMember } from "./addMember";
 import { create } from "./create";
 import { deleteOrganization } from "./delete";
 import { listMembers } from "./listMembers";
+import { removeMember } from "./removeMember";
 import { Summary } from "./summary";
 import { update } from "./update";
 
@@ -11,5 +12,6 @@ export const OrganizationService = {
   update,
   deleteOrganization,
   listMembers,
-  addMember
+  addMember,
+  removeMember
 }

@@ -10,6 +10,14 @@ export class NotificationsRepository {
     return await this.prismaService.notification.create(createDto);
   }
 
+  async delete(deleteDto: Prisma.NotificationDeleteArgs) {
+    return await this.prismaService.notification.delete(deleteDto);
+  }
+
+  async update(updateDto: Prisma.NotificationUpdateArgs) {
+    return await this.prismaService.notification.update(updateDto);
+  }
+
   findUnique(findDto: Prisma.NotificationFindUniqueArgs) {
     return this.prismaService.notification.findUnique(findDto);
   }

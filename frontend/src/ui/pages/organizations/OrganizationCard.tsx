@@ -20,7 +20,7 @@ export function OrganizationCard({name, organizationId, role, isSelectedOrganiza
 
   return (
     <div 
-      className={`p-6 border rounded-lg bg-white shadow-sm flex flex-col ${
+      className={`p-6 border rounded-lg bg-white shadow-sm flex flex-col transition-all  ${
         isSelectedOrganization === organizationId ? 'border-green-500 ring-1 ring-green-500' : 'border-gray-200'
       }`}
     >

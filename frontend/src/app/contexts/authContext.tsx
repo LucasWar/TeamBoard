@@ -5,6 +5,7 @@ import { localStorageKeys } from "../config/localStorageKeys";
 import type { User } from "../interfaces/user";
 import type { ListNotificationResponse } from "../../services/notificationsServices/listNotification";
 import { useNotifications } from "../hooks/useListNotifications";
+import { authService } from "../../services/authServices";
 
 interface AuthContextValue {
   isFetchingAuth: boolean;
@@ -41,6 +42,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
   }, [])
 
   const signout = useCallback(() => {
+    authService.signout()
     localStorage.removeItem(localStorageKeys.ACCESS_TOKEN);
     queryClient.removeQueries();
     setSignIn(false)
