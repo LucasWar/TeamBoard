@@ -118,19 +118,17 @@ export class AuthService {
         action: 'REFRESH_TOKEN',
         metadata: {
           error: 'INVALID_TOKEN',
-          refresh_token: refreshToken,
-          hashToken,
-          payload,
+          userId: payload.sub,
         },
       });
       throw new BadRequestException('Token invalido');
     }
 
     if (tokenRegister.revokedAt) {
-      throw new Error('Token ja revogado');
+      throw new UnauthorizedException('Token ja revogado');
     }
 
-    const tokens = await this.generateTokens(payload.sub, '');
+    const tokens = await this.generateTokens(payload.sub, payload.email);
 
     await this.refreshTokenService.rotate(
       hashToken,
@@ -156,7 +154,7 @@ export class AuthService {
       { sub: userId, email },
       {
         secret: process.env.JWT_ACCESS_SECRET,
-        expiresIn: '5s',
+        expiresIn: '15min',
       },
     );
 

@@ -10,6 +10,7 @@ import { tap } from 'rxjs/operators';
 import { AuthUser } from '../interfaces/auth-user.interface';
 import type { Request } from 'express';
 import { RedisService } from 'src/modules/redis/redis.service';
+import { isUUID } from '../utils/is-uuid';
 
 @Injectable()
 export class IdempotencyInteceptor implements NestInterceptor {
@@ -19,7 +20,6 @@ export class IdempotencyInteceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<unknown>> {
-    const redis = this.redisService.getClient();
     const request = context
       .switchToHttp()
       .getRequest<Request & { user?: AuthUser }>();
@@ -38,7 +38,12 @@ export class IdempotencyInteceptor implements NestInterceptor {
         'Chave de idempotencia necessária para essa requisição',
       );
     }
-    const cachedResponse = await redis.get(idempotencyKey);
+
+    if (!isUUID(idempotencyKey)) {
+      throw new BadRequestException('Chave de idempotencia deve ser um UUID');
+    }
+
+    const cachedResponse = await this.redisService.getResponse(idempotencyKey);
 
     if (cachedResponse) {
       return of({
@@ -48,12 +53,10 @@ export class IdempotencyInteceptor implements NestInterceptor {
     }
     return next.handle().pipe(
       tap((data) => {
-        void redis.set(idempotencyKey, JSON.stringify(data), {
-          expiration: {
-            type: 'EX',
-            value: 3600,
-          },
-        });
+        void this.redisService.setResponse(
+          idempotencyKey,
+          JSON.stringify(data),
+        );
       }),
     );
   }

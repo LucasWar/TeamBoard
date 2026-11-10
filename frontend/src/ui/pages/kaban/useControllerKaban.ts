@@ -1,15 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { tasksService } from "../../../services/tasksServives"
-import { useEffect, useState, useRef } from "react"
-import { arrayMove } from '@dnd-kit/sortable';
-import { 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { tasksService } from "../../../services/tasksServives";
+import { useEffect, useState, useRef } from "react";
+import { arrayMove } from "@dnd-kit/sortable";
+import {
   type DragEndEvent,
   type DragStartEvent,
   type DragOverEvent,
   useSensor,
   useSensors,
-  PointerSensor
-} from '@dnd-kit/core';
+  PointerSensor,
+} from "@dnd-kit/core";
 import type { EnumStatusTask } from "../../../app/enums/statusTask";
 import { useUpdateStatusTask } from "../../../app/hooks/useUpdateStatusTask";
 import type { Task } from "../../../app/interfaces/task";
@@ -17,26 +17,26 @@ import type { EditTask } from "../../../app/interfaces/editTask";
 import { io, type Socket } from "socket.io-client";
 import { localStorageKeys } from "../../../app/config/localStorageKeys";
 
-export function useControllerKaban(idProject: string){
+export function useControllerKaban(idProject: string) {
   const queryClient = useQueryClient();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [selectedTasks, setSelectedTasks] = useState<EditTask | null>(null)
-  const [openModal, setOpenModal] = useState(false)
+  const [selectedTasks, setSelectedTasks] = useState<EditTask | null>(null);
+  const [openModal, setOpenModal] = useState(false);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data, isSuccess } = useQuery({
-    queryKey: ['listTasks', idProject],
-    queryFn: () => tasksService.listTasksByProjectId(idProject)
-  })
+    queryKey: ["listTasks", idProject],
+    queryFn: () => tasksService.listTasksByProjectId(idProject),
+  });
 
   const { mutateAsync: deleteTask } = useMutation({
-    mutationFn: async (id:string) => {
-      await tasksService.deleteTask(id)
+    mutationFn: async (id: string) => {
+      await tasksService.deleteTask(id);
     },
-    onSuccess:() => {
-      queryClient.invalidateQueries({ queryKey: ['listTasks'] });
-    }
-  })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["listTasks"] });
+    },
+  });
 
   useEffect(() => {
     if (isSuccess) {
@@ -51,40 +51,39 @@ export function useControllerKaban(idProject: string){
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
-  const { mutateAsync } = useUpdateStatusTask()
+  const { mutateAsync } = useUpdateStatusTask();
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
-  
-  function handleDeleteTask(id:string){
+
+  function handleDeleteTask(id: string) {
     try {
-      deleteTask(id)
-    }
-    catch(error){
-      console.log(error)
-    }
-  }
-
-  function handleCloseModal(){
-    setOpenModal(false)
-    if(selectedTasks) {
-      setSelectedTasks(null)
+      deleteTask(id);
+    } catch (error) {
+      console.log(error);
     }
   }
 
-  function handleOpenModal(){
-    setOpenModal(true)
+  function handleCloseModal() {
+    setOpenModal(false);
+    if (selectedTasks) {
+      setSelectedTasks(null);
+    }
   }
 
-  function handleOpenEditModal(task: EditTask){
-    setSelectedTasks(task)
-    setOpenModal(true)
+  function handleOpenModal() {
+    setOpenModal(true);
+  }
+
+  function handleOpenEditModal(task: EditTask) {
+    setSelectedTasks(task);
+    setOpenModal(true);
   }
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    const task = tasks?.find(t => t.id === active.id);
+    const task = tasks?.find((t) => t.id === active.id);
     if (task) {
       // Guarda o snapshot ORIGINAL (status/position antes de qualquer
       // reordenação ao vivo) — é isso que vamos mandar como old* pro backend.
@@ -107,20 +106,20 @@ export function useControllerKaban(idProject: string){
     const overId = over.id;
     if (activeId === overId) return;
 
-    const isActiveATask = active.data.current?.type === 'Task';
+    const isActiveATask = active.data.current?.type === "Task";
     if (!isActiveATask) return;
 
-    const isOverATask = over.data.current?.type === 'Task';
+    const isOverATask = over.data.current?.type === "Task";
 
     setTasks((prev) => {
-      const activeIndex = prev.findIndex(t => t.id === activeId);
+      const activeIndex = prev.findIndex((t) => t.id === activeId);
       if (activeIndex === -1) return prev;
 
       const current = prev[activeIndex];
 
       let newStatus: EnumStatusTask;
       if (isOverATask) {
-        const overTask = prev.find(t => t.id === overId);
+        const overTask = prev.find((t) => t.id === overId);
         if (!overTask) return prev;
         newStatus = overTask.status;
       } else {
@@ -131,7 +130,7 @@ export function useControllerKaban(idProject: string){
       if (current.status === newStatus) {
         // Mesma coluna: só reordena se estiver sobre outro card
         if (isOverATask) {
-          const overIndex = prev.findIndex(t => t.id === overId);
+          const overIndex = prev.findIndex((t) => t.id === overId);
           if (overIndex === -1 || overIndex === activeIndex) return prev;
           return arrayMove(prev, activeIndex, overIndex);
         }
@@ -143,7 +142,7 @@ export function useControllerKaban(idProject: string){
       updated[activeIndex] = { ...current, status: newStatus };
 
       if (isOverATask) {
-        const overIndex = updated.findIndex(t => t.id === overId);
+        const overIndex = updated.findIndex((t) => t.id === overId);
         if (overIndex !== -1) {
           return arrayMove(updated, activeIndex, overIndex);
         }
@@ -154,7 +153,7 @@ export function useControllerKaban(idProject: string){
       updated.forEach((t, idx) => {
         if (t.status === newStatus) lastIndexOfStatus = idx;
       });
-      
+
       if (lastIndexOfStatus !== -1 && lastIndexOfStatus !== activeIndex) {
         return arrayMove(updated, activeIndex, lastIndexOfStatus);
       }
@@ -173,7 +172,7 @@ export function useControllerKaban(idProject: string){
     const activeId = active.id as string;
 
     setTasks((prev) => {
-      const currentIndex = prev.findIndex(t => t.id === activeId);
+      const currentIndex = prev.findIndex((t) => t.id === activeId);
       if (currentIndex === -1) return prev;
 
       const current = prev[currentIndex];
@@ -181,8 +180,8 @@ export function useControllerKaban(idProject: string){
 
       // A ordem final já está correta no array (fruto do onDragOver),
       // então a posição é simplesmente o índice dentro da coluna.
-      const columnTasks = prev.filter(t => t.status === newStatus);
-      const newPosition = columnTasks.findIndex(t => t.id === activeId);
+      const columnTasks = prev.filter((t) => t.status === newStatus);
+      const newPosition = columnTasks.findIndex((t) => t.id === activeId);
 
       const oldStatus = draggedTaskSnapshot.status;
       const oldPosition = draggedTaskSnapshot.position;
@@ -202,10 +201,10 @@ export function useControllerKaban(idProject: string){
               oldStatus,
               newPosition,
             }).catch((error) => {
-              console.error('Erro ao atualizar tarefa:', error);
+              console.error("Erro ao atualizar tarefa:", error);
             });
           } catch (error) {
-            console.error('Erro ao atualizar tarefa:', error);
+            console.error("Erro ao atualizar tarefa:", error);
           }
         }, 300);
       }
@@ -215,22 +214,23 @@ export function useControllerKaban(idProject: string){
   };
 
   useEffect(() => {
-    const token = localStorage.getItem(
-      localStorageKeys.ACCESS_TOKEN
-    );
+    const token = localStorage.getItem(localStorageKeys.ACCESS_TOKEN);
 
     if (!token) return;
 
-    const socket: Socket = io('http://localhost:3000/tasks', {
+    const socket: Socket = io("http://localhost:3000/tasks", {
       auth: {
         token,
       },
       extraHeaders: {
         project_id: idProject,
+        organization_id: localStorage.getItem(
+          localStorageKeys.ORGANIZATION_ID,
+        ) as string,
       },
     });
 
-    socket.on('task.created', (task: Task) => {
+    socket.on("task.created", (task: Task) => {
       setTasks((currentTasks) => {
         if (currentTasks.some((item) => item.id === task.id)) {
           return currentTasks;
@@ -239,17 +239,15 @@ export function useControllerKaban(idProject: string){
       });
     });
 
-    socket.on('task.updated', (task: Task) => {
+    socket.on("task.updated", (task: Task) => {
       setTasks((currentTasks) =>
-        currentTasks.map((item) =>
-          item.id === task.id ? task : item
-        )
+        currentTasks.map((item) => (item.id === task.id ? task : item)),
       );
     });
 
-    socket.on('task.deleted', (taskId: string) => {
+    socket.on("task.deleted", (taskId: string) => {
       setTasks((currentTasks) =>
-        currentTasks.filter((item) => item.id !== taskId)
+        currentTasks.filter((item) => item.id !== taskId),
       );
     });
 
@@ -258,27 +256,29 @@ export function useControllerKaban(idProject: string){
     // clients. Depois de mesclar, re-sorta por position pra manter
     // a ordem do array consistente com o que veio do backend.
     socket.on(
-      'tasks.reordered',
+      "tasks.reordered",
       (payload: { projectId: string; movedTask: Task; tasks: Task[] }) => {
         setTasks((currentTasks) => {
-          const affectedMap = new Map(payload.tasks.map(t => [t.id, t]));
+          const affectedMap = new Map(payload.tasks.map((t) => [t.id, t]));
           affectedMap.set(payload.movedTask.id, payload.movedTask);
 
-          const existingIds = new Set(currentTasks.map(t => t.id));
+          const existingIds = new Set(currentTasks.map((t) => t.id));
 
-          const merged = currentTasks.map(t =>
-            affectedMap.has(t.id) ? affectedMap.get(t.id)! : t
+          const merged = currentTasks.map((t) =>
+            affectedMap.has(t.id) ? affectedMap.get(t.id)! : t,
           );
 
-          const missing = payload.tasks.filter(t => !existingIds.has(t.id));
+          const missing = payload.tasks.filter((t) => !existingIds.has(t.id));
 
-          return [...merged, ...missing].sort((a, b) => a.position - b.position);
+          return [...merged, ...missing].sort(
+            (a, b) => a.position - b.position,
+          );
         });
-      }
+      },
     );
 
-    socket.on('disconnect', (reason) => {
-      console.log('Socket desconectado:', reason);
+    socket.on("disconnect", (reason) => {
+      console.log("Socket desconectado:", reason);
     });
 
     return () => {
@@ -294,7 +294,7 @@ export function useControllerKaban(idProject: string){
       }
     };
   }, []);
-  
+
   return {
     tasks,
     setTasks,
@@ -309,6 +309,6 @@ export function useControllerKaban(idProject: string){
     handleOpenModal,
     handleOpenEditModal,
     selectedTasks,
-    handleDeleteTask
-  }
+    handleDeleteTask,
+  };
 }
